@@ -46,9 +46,9 @@ class OpenFLShaderMacro {
 					var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
 					if (isUniform) {
 						// 变量定义
-						var type:ComplexType = cast field.kind.getParameters()[0];
+						var type:ExprDef = cast field.kind.getParameters()[0];
 						var value = cast field.kind.getParameters()[1];
-						var c = type == null ? toExprType(value.expr) : type.getParameters()[0].name.toLowerCase();
+						var c = type == null ? toExprType(value.expr) : toExprType(type);
 						if (value == null) {
 							uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n\r");
 						} else {
@@ -235,12 +235,12 @@ class OpenFLShaderMacro {
 		lastType = null;
 		switch (type) {
 			case "ENew", "TPath":
-				lastType = expr.getParameters()[0].name.toLowerCase();
-				return lastType;
+				lastType = expr.getParameters()[0].name;
+				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			case "EConst":
 				expr = expr.getParameters()[0];
-				lastType = expr.getName().substr(1).toLowerCase();
-				return lastType;
+				lastType = expr.getName().substr(1);
+				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			default:
 				throw "无法使用" + type + "建立类型关系";
 		}
