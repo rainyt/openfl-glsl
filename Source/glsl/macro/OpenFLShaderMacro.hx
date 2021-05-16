@@ -1,7 +1,6 @@
 package glsl.macro;
 
 #if macro
-import haxe.macro.ExprTools;
 import haxe.macro.Expr;
 import haxe.macro.Context;
 #end
