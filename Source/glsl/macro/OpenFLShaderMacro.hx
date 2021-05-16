@@ -37,21 +37,31 @@ class OpenFLShaderMacro {
 		var shader = "\n\r";
 		var defines:Array<String> = [];
 		var glslFuncs:Array<String> = [];
+		var vars:Map<String, String> = [];
 		var maps:Map<String, String> = [];
 		uniform = [];
 		for (field in fields) {
 			switch (field.kind.getName()) {
 				case "FVar":
+					var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
 					var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
-					if (isUniform) {
+					if (isUniform || isGLSLVar) {
 						// 变量定义
 						var type:ExprDef = cast field.kind.getParameters()[0];
 						var value = cast field.kind.getParameters()[1];
 						var c = type == null ? toExprType(value.expr) : toExprType(type);
-						if (value == null) {
-							uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n\r");
+						if (isUniform) {
+							if (value == null) {
+								uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n\r");
+							} else {
+								uniform.set(field.name, "uniform " + c + " u_" + field.name + "=" + toExprValue(value.expr) + ";\n\r");
+							}
 						} else {
-							uniform.set(field.name, "uniform " + c + " u_" + field.name + "=" + toExprValue(value.expr) + ";\n\r");
+							if (value == null) {
+								vars.set(field.name, c + " " + field.name + ";\n\r");
+							} else {
+								vars.set(field.name, c + " " + field.name + "=" + toExprValue(value.expr) + ";\n\r");
+							}
 						}
 						shader += uniform.get(field.name);
 					}
@@ -160,6 +170,10 @@ class OpenFLShaderMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
+			fragment += value;
+		}
+		// var定义
+		for (key => value in vars) {
 			fragment += value;
 		}
 
