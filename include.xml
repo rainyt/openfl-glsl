@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+
+	<!-- 原始实现 -->
+	<source path="Source" />
+	<!-- GLSL -->
+	<haxelib name="vector-math"/>
+
+</project>

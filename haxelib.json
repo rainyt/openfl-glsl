@@ -1,0 +1,14 @@
+{
+  "name": "openfl-glsl",
+  "url": "https://github.com/rainyt/openfl-glsl",
+  "license": "MIT",
+  "tags": ["openfl","zygameui"],
+  "description": "Allow Haxe to write GLSL directly in OpenFL.",
+  "version": "0.0.1",
+  "releasenote": "",
+  "contributors": ["rainy"],
+  "dependencies": {
+      
+  },
+  "classPath": "Source"
+}
