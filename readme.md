@@ -51,8 +51,8 @@ class Shader extends glsl.OpenFLShader {}
 通过`haxe build.hxml`编译后会自动输出。
 After compiling through 'haxe build. Hxml', it will output automatically.
 
-## :glsl
-在方法中添加`:glsl`则会将方法转义成GLSL，并提供给着色器使用：
+## @:glsl
+在方法中添加`@:glsl`则会将方法转义成GLSL，并提供给着色器使用：
 Adding 'glsl' to the method will escape the method to glsl and provide it to the shader for use:
 Reference examples:
 [:glsl Use Function](https://github.com/rainyt/openfl-glsl-samples/blob/main/Source/glsl/BitmapGLSL4.hx)
@@ -62,8 +62,8 @@ Reference examples:
 }
 ```
 
-## :uniform
-在类中添加`:uniform`变量，当需要提供参数时，需要通过`u_`+变量名组合赋值：
+## @:uniform
+在类中添加`@:uniform`变量，当需要提供参数时，需要通过`u_`+变量名组合赋值：
 Add the ': uniform' variable to the class. When you need to provide parameters, you need to use the 'U'_`+ Variable name combination assignment:
 ```haxe
 class Shader extends glsl.OpenFLShader {
@@ -72,5 +72,14 @@ class Shader extends glsl.OpenFLShader {
 		super();
 		this.u_time.value = [0];
 	}
+}
+```
+
+## @:define
+在指定的`fragment()`方法中，新增`@:define`可以对该着色器添加宏定义：
+```haxe
+@:define("VALUE 10.")
+override public function fragment(){
+	color.r = 10 / VALUE;
 }
 ```
