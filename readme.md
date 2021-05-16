@@ -61,3 +61,16 @@ Reference examples:
 	return v.x + v.y;
 }
 ```
+
+## :uniform
+在类中添加`:uniform`变量，当需要提供参数时，需要通过`u_`+变量名组合赋值：
+Add the ': uniform' variable to the class. When you need to provide parameters, you need to use the 'U'_`+ Variable name combination assignment:
+```haxe
+class Shader extends glsl.OpenFLShader {
+	@:uniform public var time:Float;
+	public function new(){
+		super();
+		this.u_time.value = [0];
+	}
+}
+```
