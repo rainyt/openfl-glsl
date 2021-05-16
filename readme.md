@@ -40,3 +40,24 @@ bitmap.shader = new Test();
 ## 注意
 - 当前仅实现了`:glFragmentSource`的GLSL的编写支持。
 - 需要依赖[vector-math](https://github.com/haxiomic/vector-math)
+
+## :debug
+在Class上添加`:debug`可以将转义后的GLSL输出：
+Add `:debug` to class to output escaped glsl:
+```haxe
+@:debug
+class Shader extends glsl.OpenFLShader {}
+```
+通过`haxe build.hxml`编译后会自动输出。
+After compiling through 'haxe build. Hxml', it will output automatically.
+
+## :glsl
+在方法中添加`:glsl`则会将方法转义成GLSL，并提供给着色器使用：
+Adding 'glsl' to the method will escape the method to glsl and provide it to the shader for use:
+Reference examples:
+[:glsl Use Function](https://github.com/rainyt/openfl-glsl-samples/blob/main/Source/glsl/BitmapGLSL4.hx)
+```haxe
+@:glsl public function name(v:Vec2):Float{
+	return v.x + v.y;
+}
+```
