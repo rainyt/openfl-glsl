@@ -38,4 +38,5 @@ bitmap.shader = new Test();
 ```
 
 ## 注意
-当前仅实现了`:glFragmentSource`的GLSL的编写支持。
+- 当前仅实现了`:glFragmentSource`的GLSL的编写支持。
+- 需要依赖[vector-math](https://github.com/haxiomic/vector-math)
