@@ -3,6 +3,7 @@ package glsl;
 #if zygame
 import zygame.core.Start;
 #end
+#if openfl
 import openfl.display.DisplayObjectShader;
 
 function float(a:Dynamic):Float {
@@ -23,7 +24,7 @@ function texture2D(texture:Dynamic, vec2:Vec2):Vec4 {
 	return null;
 }
 
-@:autoBuild(glsl.macro.OpenFLShaderMacro.buildShader())
+@:autoBuild(glsl.macro.GLSLCompileMacro.build())
 class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core.Refresher #end {
 	/** 
 	 * 纹理UV
@@ -133,3 +134,4 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 
 	public function onFrame():Void {}
 }
+#end

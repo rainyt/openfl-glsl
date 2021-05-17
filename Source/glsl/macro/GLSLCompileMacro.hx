@@ -6,9 +6,12 @@ import haxe.macro.Context;
 #end
 
 /**
- * 解析OpenFLShader的宏处理
+ * 使用Haxe编写GLSL，编写时，请确保你使用的类都是GLSL所支持的，基础类由vector-math支持。
+ * 在Haxe中，你可以正常使用：Array<T>、int、float、bool、vec2、vec3、vec4、mat2、mat3、mat4等。
+ * Use Haxe to write GLSL. When writing, please make sure that the classes you use are supported by GLSL, and the basic classes are supported by vector-math.
+ * In Haxe, you can use it normally: Array<T>, int, float, bool, vec2, vec3, vec4, mat2, mat3, mat4, etc.
  */
-class OpenFLShaderMacro {
+class GLSLCompileMacro {
 	/**
 	 * 数组使用量映射关系
 	 */
@@ -36,10 +39,11 @@ class OpenFLShaderMacro {
 
 	/**
 	 * 自动编译buildShader
+	 * @param platform 定义编译平台，目前支持openfl、glsl
 	 * @return Array<Field>
 	 */
 	#if macro
-	macro public static function buildShader():Array<Field> {
+	macro public static function build(platform:String = "openfl"):Array<Field> {
 		var pos:Position = Context.currentPos();
 		var fields = Context.getBuildFields();
 		var isDebug = Context.getLocalClass().get().meta.has(":debug");
@@ -257,44 +261,67 @@ class OpenFLShaderMacro {
 			trace("fragment=\n" + fragment);
 			trace("vertex=\n" + vertex);
 		}
-
-		var openflGLSource = [];
-		if (maps.exists("fragment")) {
-			openflGLSource.push({
-				name: ":glFragmentSource",
-				params: [macro $v{fragment}],
-				pos: pos
-			});
-		}
-		if (maps.exists("vertex")) {
-			openflGLSource.push({
-				name: ":glVertexSource",
-				params: [macro $v{vertex}],
-				pos: pos
-			});
-		}
-		var newField = null;
-		for (f in fields) {
-			if (f.name == "new") {
-				newField = f;
-				newField.meta = openflGLSource;
-				break;
+		if (platform == "openfl") {
+			var openflGLSource = [];
+			if (maps.exists("fragment")) {
+				openflGLSource.push({
+					name: ":glFragmentSource",
+					params: [macro $v{fragment}],
+					pos: pos
+				});
 			}
-		}
-		if (newField == null) {
-			newField = {
-				name: "new",
-				doc: null,
-				meta: openflGLSource,
-				access: [APublic],
-				kind: FFun({
-					args: [],
-					ret: macro:Void,
-					expr: macro {super();}
-				}),
-				pos: pos
-			};
-			fields.push(newField);
+			if (maps.exists("vertex")) {
+				openflGLSource.push({
+					name: ":glVertexSource",
+					params: [macro $v{vertex}],
+					pos: pos
+				});
+			}
+			var newField = null;
+			for (f in fields) {
+				if (f.name == "new") {
+					newField = f;
+					newField.meta = openflGLSource;
+					break;
+				}
+			}
+			if (newField == null) {
+				newField = {
+					name: "new",
+					doc: null,
+					meta: openflGLSource,
+					access: [APublic],
+					kind: FFun({
+						args: [],
+						ret: macro:Void,
+						expr: macro {super();}
+					}),
+					pos: pos
+				};
+				fields.push(newField);
+			}
+		} else {
+			// 纯Haxe转义GLSL
+			if (maps.exists("fragment")) {
+				fields.push({
+					name: "fragmentSource",
+					doc: null,
+					meta: [],
+					access: [APublic,AStatic],
+					kind: FVar(macro:String,macro $v{fragment}),
+					pos: pos
+				});
+			}
+			if (maps.exists("vertex")) {
+				fields.push({
+					name: "vertexSource",
+					doc: null,
+					meta: [],
+					access: [APublic,AStatic],
+					kind: FVar(macro:String,macro $v{vertex}),
+					pos: pos
+				});
+			}
 		}
 		return fields;
 	}

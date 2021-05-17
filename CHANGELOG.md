@@ -1,3 +1,6 @@
+## 0.0.4
+- 1、改进：将`GLSLCompileMacro`与OpenFL功能解耦，允许单独对类使用。
+
 ## 0.0.3
 - 1、新增：新增OpenFL的GLSL参数访问。 New: Added GLSL parameter access of OpenFL.
 - 2、新增`vertex`顶点着色器`:glVertexSource`支持。Added support for `vertex` vertex shader`:glVertexSource`.

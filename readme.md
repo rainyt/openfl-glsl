@@ -1,6 +1,8 @@
 ## OpenFL-GLSL
-允许在OpenFL中直接使用Haxe编写GLSL编码，并在OpenFL中直接使用。
-Allow Haxe to write GLSL code directly in OpenFL and use it directly in OpenFL.
+使用Haxe编写GLSL，编写时，请确保你使用的类都是GLSL所支持的，基础类由vector-math支持。
+在Haxe中，你可以正常使用：Array<T>、int、float、bool、vec2、vec3、vec4、mat2、mat3、mat4等。
+Use Haxe to write GLSL. When writing, please make sure that the classes you use are supported by GLSL, and the basic classes are supported by vector-math.
+In Haxe, you can use it normally: Array<T>, int, float, bool, vec2, vec3, vec4, mat2, mat3, mat4, etc.
 
 ## Test.hx
 ```haxe
