@@ -38,7 +38,7 @@ bitmap.shader = new Test();
 ```
 
 ## 注意
-- 当前仅实现了`:glFragmentSource`的GLSL的编写支持。Currently, only GLSL writing support of `:glFragmentSource` is implemented.
+- 当前已实现了`:glFragmentSource`以及`:glVertexSource`的GLSL的编写支持。Currently, GLSL writing support for `:glFragmentSource` and `:glVertexSource` has been implemented.
 - 需要依赖（Need to rely on vector-math）[vector-math](https://github.com/haxiomic/vector-math) 
 
 # 宏功能
@@ -73,6 +73,23 @@ class Shader extends glsl.OpenFLShader {
 	public function new(){
 		super();
 		this.u_time.value = [0];
+	}
+}
+```
+
+## @:varying
+在类中添加`@:varying`变量，可以定义varying变量：
+Add the `@:varying` variable to the class, you can define the varying variable:
+```haxe
+class Shader extends glsl.OpenFLShader {
+	@:varying public var textureCoords:Vec2;
+	override function vertex() {
+		super.vertex();
+		textureCoords = vec2(gl_openfl_Position.x, 0);
+	}
+	override function fragment() {
+		super.fragment();
+		gl_FragColor = vec4(textureCoords, 0, 1);
 	}
 }
 ```
