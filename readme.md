@@ -38,10 +38,12 @@ bitmap.shader = new Test();
 ```
 
 ## 注意
-- 当前仅实现了`:glFragmentSource`的GLSL的编写支持。
-- 需要依赖[vector-math](https://github.com/haxiomic/vector-math)
+- 当前仅实现了`:glFragmentSource`的GLSL的编写支持。Currently, only GLSL writing support of `:glFragmentSource` is implemented.
+- 需要依赖（Need to rely on vector-math）[vector-math](https://github.com/haxiomic/vector-math) 
 
-## :debug
+# 宏功能
+
+## @:debug
 在Class上添加`:debug`可以将转义后的GLSL输出：
 Add `:debug` to class to output escaped glsl:
 ```haxe
@@ -82,4 +84,11 @@ class Shader extends glsl.OpenFLShader {
 override public function fragment(){
 	color.r = 10 / VALUE;
 }
+```
+
+## @:precision
+`@:precision`允许用来定义precision：
+```haxe
+@:precision("highp float")
+override public function fragment(){}
 ```
