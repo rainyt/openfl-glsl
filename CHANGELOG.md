@@ -1,5 +1,6 @@
 ## 0.0.4
 - 1、改进：将`GLSLCompileMacro`与OpenFL功能解耦，允许单独对类使用。
+- 2、新增：`@:autoBuild(glsl.macro.GLSLCompileMacro.build("glsl"))`用于支持Haxe解析为GLSL。
 
 ## 0.0.3
 - 1、新增：新增OpenFL的GLSL参数访问。 New: Added GLSL parameter access of OpenFL.
