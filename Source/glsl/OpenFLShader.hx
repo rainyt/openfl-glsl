@@ -31,6 +31,21 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	public var gl_openfl_TextureCoordv:Vec2;
 
 	/**
+	 * 颜色偏移
+	 */
+	public var gl_openfl_ColorOffsetv:Vec4;
+
+	/**
+	 * 颜色相乘
+	 */
+	public var gl_openfl_ColorMultiplierv:Vec4;
+
+	/**
+	 * 是否存在颜色转换
+	 */
+	public var gl_openfl_HasColorTransform:Bool;
+
+	/**
 	 * 纹理尺寸
 	 */
 	public var gl_openfl_TextureSize:Vec2;
@@ -56,7 +71,7 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	public var color:Vec4;
 
 	/**
-	 * 片段着色器，需要时，请重写这个
+	 * 片段着色器，需要Fragment时，请重写这个
 	 */
 	public function fragment():Void {}
 
