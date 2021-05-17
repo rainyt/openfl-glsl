@@ -15,6 +15,11 @@ class OpenFLShaderMacro {
 	public static var uniform:Map<String, String>;
 
 	/**
+	 * varying映射
+	 */
+	public static var varying:Map<String, String>;
+
+	/**
 	 * 历史上一次类型记录
 	 */
 	public static var lastType:String;
@@ -40,17 +45,25 @@ class OpenFLShaderMacro {
 		var vars:Map<String, String> = [];
 		var maps:Map<String, String> = [];
 		uniform = [];
+		varying = [];
 		for (field in fields) {
 			switch (field.kind.getName()) {
 				case "FVar":
 					var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
 					var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
-					if (isUniform || isGLSLVar) {
+					var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
+					if (isUniform || isGLSLVar || isVarying) {
 						// 变量定义
 						var type:ExprDef = cast field.kind.getParameters()[0];
 						var value = cast field.kind.getParameters()[1];
 						var c = type == null ? toExprType(value.expr) : toExprType(type);
-						if (isUniform) {
+						if (isVarying) {
+							if (value == null) {
+								varying.set(field.name, "varying " + c + " " + field.name + ";\n");
+							} else {
+								varying.set(field.name, "varying " + c + " " + field.name + "=" + toExprValue(value.expr) + ";\n");
+							}
+						} else if (isUniform) {
 							if (value == null) {
 								uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n");
 							} else {
@@ -173,6 +186,11 @@ class OpenFLShaderMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
+			vertex += value;
+			fragment += value;
+		}
+		// varying定义
+		for (key => value in varying) {
 			vertex += value;
 			fragment += value;
 		}

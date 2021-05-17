@@ -9,3 +9,4 @@ gl_openfl_ColorOffsetv;
 gl_openfl_HasColorTransform;
 ```
 - 2、新增`vertex`顶点着色器`:glVertexSource`支持。
+- 3、新增`:varying`支持，可定义varying变量。
