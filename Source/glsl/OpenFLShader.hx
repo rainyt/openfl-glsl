@@ -61,9 +61,24 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	public var gl_openfl_Alphav:Float;
 
 	/**
+	 * 
+	 */
+	public var gl_openfl_Matrix:Mat4;
+
+	/**
+	 * 顶点参数
+	 */
+	public var gl_openfl_Position:Vec4;
+
+	/**
 	 * 最终值输出
 	 */
 	public var gl_FragColor:Vec4;
+
+	/**
+	 * 最终顶点坐标输出
+	 */
+	public var gl_Position:Vec4;
 
 	/**
 	 * 当前着色器获得到的颜色

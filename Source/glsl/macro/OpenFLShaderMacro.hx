@@ -34,7 +34,7 @@ class OpenFLShaderMacro {
 		if (noShader) {
 			return fields;
 		}
-		var shader = "\n\r";
+		var shader = "\n";
 		var defines:Array<String> = [];
 		var glslFuncs:Array<String> = [];
 		var vars:Map<String, String> = [];
@@ -52,15 +52,15 @@ class OpenFLShaderMacro {
 						var c = type == null ? toExprType(value.expr) : toExprType(type);
 						if (isUniform) {
 							if (value == null) {
-								uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n\r");
+								uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n");
 							} else {
-								uniform.set(field.name, "uniform " + c + " u_" + field.name + "=" + toExprValue(value.expr) + ";\n\r");
+								uniform.set(field.name, "uniform " + c + " u_" + field.name + "=" + toExprValue(value.expr) + ";\n");
 							}
 						} else {
 							if (value == null) {
-								vars.set(field.name, c + " " + field.name + ";\n\r");
+								vars.set(field.name, c + " " + field.name + ";\n");
 							} else {
-								vars.set(field.name, c + " " + field.name + "=" + toExprValue(value.expr) + ";\n\r");
+								vars.set(field.name, c + " " + field.name + "=" + toExprValue(value.expr) + ";\n");
 							}
 						}
 						shader += uniform.get(field.name);
@@ -68,7 +68,7 @@ class OpenFLShaderMacro {
 				case "FFun":
 					// 方法解析
 					var isGLSLFunc = field.meta.filter((f) -> f.name == ":glsl").length != 0;
-					if (field.name != "fragment" && !isGLSLFunc)
+					if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
 						continue;
 					if (isGLSLFunc) {
 						glslFuncs.push(field.name);
@@ -80,11 +80,11 @@ class OpenFLShaderMacro {
 						switch (value.name) {
 							case ":precision":
 								var expr:ExprDef = value.params[0].expr.getParameters()[0];
-								line = "precision " + expr.getParameters()[0] + ";\n\r";
+								line = "precision " + expr.getParameters()[0] + ";\n";
 							case ":define":
 								var expr:ExprDef = value.params[0].expr.getParameters()[0];
 								var defineValue = expr.getParameters()[0];
-								line = "#define " + defineValue + "\n\r";
+								line = "#define " + defineValue + "\n";
 								var newDefineField = {
 									name: defineValue.substr(0, defineValue.indexOf(" ")),
 									doc: null,
@@ -101,7 +101,7 @@ class OpenFLShaderMacro {
 						}
 					}
 					var retType = toExprType(field.kind.getParameters()[0].ret);
-					shader += "\n\r" + retType + " " + field.name + "(" + toExprArgs(field.kind.getParameters()[0].args) + "){\n\r";
+					shader += "\n" + retType + " " + field.name + "(" + toExprArgs(field.kind.getParameters()[0].args) + "){\n";
 					if (isGLSLFunc)
 						maps.set(field.name,
 							maps.get(field.name)
@@ -151,51 +151,66 @@ class OpenFLShaderMacro {
 								throw "意外的运行符：" + expr.getName();
 						}
 						if (line != "") {
-							maps.set(field.name, maps.get(field.name) + line + ";\n\r");
-							shader += line + ";\n\r";
+							maps.set(field.name, maps.get(field.name) + line + ";\n");
+							shader += line + ";\n";
 						}
 					}
-					shader += "\n\r}\n\r";
-					maps.set(field.name, maps.get(field.name) + "\n\r}\n\r");
+					shader += "\n}\n";
+					maps.set(field.name, maps.get(field.name) + "\n}\n");
 			}
 		}
 		// 创建new
+		var vertex = "#pragma header\n";
 		var fragment = "#pragma header\n";
 		for (d in defines) {
+			vertex += d;
 			fragment += d;
 		}
 		// 方法定义
 		for (index => value in glslFuncs) {
+			vertex += maps.get(value);
 			fragment += maps.get(value);
 		}
 		// uniform定义
 		for (key => value in uniform) {
+			vertex += value;
 			fragment += value;
 		}
 		// var定义
 		for (key => value in vars) {
+			vertex += value;
 			fragment += value;
 		}
-
 		fragment += maps.get("fragment");
+		vertex += maps.get("vertex");
 
 		if (isDebug) {
 			trace("class=", Context.getLocalClass());
 			trace("uniform=" + uniform);
-			trace("\n\rGLSL脚本：\n\r" + shader);
-			trace("fragment=\n\r" + fragment);
+			trace("\nGLSL脚本：\n" + shader);
+			trace("fragment=\n" + fragment);
+			trace("vertex=\n" + vertex);
+		}
+		var openflGLSource = [];
+		if (maps.exists("fragment")) {
+			openflGLSource.push({
+				name: ":glFragmentSource",
+				params: [macro $v{fragment}],
+				pos: pos
+			});
+		}
+		if (maps.exists("vertex")) {
+			openflGLSource.push({
+				name: ":glVertexSource",
+				params: [macro $v{vertex}],
+				pos: pos
+			});
 		}
 		var newField = null;
 		for (f in fields) {
 			if (f.name == "new") {
 				newField = f;
-				newField.meta = [
-					{
-						name: ":glFragmentSource",
-						params: [macro $v{fragment}],
-						pos: pos
-					}
-				];
+				newField.meta = openflGLSource;
 				break;
 			}
 		}
@@ -203,13 +218,7 @@ class OpenFLShaderMacro {
 			newField = {
 				name: "new",
 				doc: null,
-				meta: [
-					{
-						name: ":glFragmentSource",
-						params: [macro $v{fragment}],
-						pos: pos
-					}
-				],
+				meta: openflGLSource,
 				access: [APublic],
 				kind: FFun({
 					args: [],
@@ -348,7 +357,7 @@ class OpenFLShaderMacro {
 				if (value.indexOf("gl_openfl") == 0)
 					value = value.substr(3);
 				var ret = value + "." + expr.getParameters()[1];
-				if (ret == "super.fragment")
+				if (ret.indexOf("super") == 0)
 					return null;
 				return ret;
 			case "EBinop":
