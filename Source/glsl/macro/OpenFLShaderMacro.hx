@@ -10,6 +10,16 @@ import haxe.macro.Context;
  */
 class OpenFLShaderMacro {
 	/**
+	 * 数组使用量映射关系
+	 */
+	public static var arrayUid:Int;
+
+	public static var arrayUidByName:Map<String, {
+		id:Int,
+		len:Int
+	}>;
+
+	/**
 	 * uniform映射
 	 */
 	public static var uniform:Map<String, String>;
@@ -45,6 +55,8 @@ class OpenFLShaderMacro {
 		var glslFuncs:Array<String> = [];
 		var vars:Map<String, String> = [];
 		var maps:Map<String, String> = [];
+		arrayUid = 0;
+		arrayUidByName = [];
 		uniform = [];
 		varying = [];
 		for (field in fields) {
@@ -58,24 +70,51 @@ class OpenFLShaderMacro {
 						var type:ExprDef = cast field.kind.getParameters()[0];
 						var value = cast field.kind.getParameters()[1];
 						var c = type == null ? toExprType(value.expr) : toExprType(type);
+						var isArray = c.indexOf("$array") != -1;
+						if (isArray)
+							c = c.substr(0, c.lastIndexOf("$"));
 						if (isVarying) {
 							if (value == null) {
-								varying.set(field.name, "varying " + c + " " + field.name + ";\n");
+								varying.set(field.name, "varying " + c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
 							} else {
-								varying.set(field.name, "varying " + c + " " + field.name + "=" + toExprValue(value.expr) + ";\n");
+								varying.set(field.name,
+									"varying "
+									+ c
+									+ " "
+									+ field.name
+									+ (isArray ? "$[" + arrayUid + "]" : "")
+									+ "="
+									+ toExprValue(value.expr)
+									+ ";\n");
 							}
 						} else if (isUniform) {
 							if (value == null) {
-								uniform.set(field.name, "uniform " + c + " u_" + field.name + ";\n");
+								uniform.set(field.name, "uniform " + c + " u_" + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
 							} else {
-								uniform.set(field.name, "uniform " + c + " u_" + field.name + "=" + toExprValue(value.expr) + ";\n");
+								uniform.set(field.name,
+									"uniform "
+									+ c
+									+ " u_"
+									+ field.name
+									+ (isArray ? "$[" + arrayUid + "]" : "")
+									+ "="
+									+ toExprValue(value.expr)
+									+ ";\n");
 							}
 						} else {
 							if (value == null) {
-								vars.set(field.name, c + " " + field.name + ";\n");
+								vars.set(field.name, c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
 							} else {
-								vars.set(field.name, c + " " + field.name + "=" + toExprValue(value.expr) + ";\n");
+								vars.set(field.name, c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + "=" + toExprValue(value.expr) + ";\n");
 							}
+						}
+						// 如果是数组，则需要定义数量
+						if (isArray) {
+							arrayUidByName.set(field.name, {
+								id: arrayUid,
+								len: 1
+							});
+							arrayUid++;
 						}
 						shader += uniform.get(field.name);
 					}
@@ -205,6 +244,12 @@ class OpenFLShaderMacro {
 		fragment += maps.get("fragment");
 		vertex += maps.get("vertex");
 
+		// 数组长度转义
+		for (key => value in arrayUidByName) {
+			fragment = StringTools.replace(fragment, "$[" + value.id + "]", "[" + value.len + "]");
+			vertex = StringTools.replace(vertex, "$[" + value.id + "]", "[" + value.len + "]");
+		}
+
 		if (isDebug) {
 			trace("class=", Context.getLocalClass());
 			trace("uniform=" + uniform);
@@ -212,6 +257,7 @@ class OpenFLShaderMacro {
 			trace("fragment=\n" + fragment);
 			trace("vertex=\n" + vertex);
 		}
+		
 		var openflGLSource = [];
 		if (maps.exists("fragment")) {
 			openflGLSource.push({
@@ -277,8 +323,15 @@ class OpenFLShaderMacro {
 		var type = expr.getName();
 		lastType = null;
 		switch (type) {
+			case "TPType":
+				expr = expr.getParameters()[0];
+				return expr.getParameters()[0].name;
 			case "ENew", "TPath":
 				lastType = expr.getParameters()[0].name;
+				if (lastType == "Array") {
+					// 数组转换GLSL
+					lastType = toExprType(expr.getParameters()[0].params[0]) + "$array";
+				}
 				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			case "EConst":
 				expr = expr.getParameters()[0];
@@ -331,7 +384,14 @@ class OpenFLShaderMacro {
 					return ret + "=" + toExprValue(varvalue.expr);
 			case "EArray":
 				lastType = "int";
-				return toExprValue(expr.getParameters()[0].expr) + "[" + toExprValue(expr.getParameters()[1].expr) + "]";
+				var toarray = toExprValue(expr.getParameters()[0].expr);
+				var value = Std.parseInt(toExprValue(expr.getParameters()[1].expr));
+				if (arrayUidByName.exists(toarray)) {
+					var obj = arrayUidByName.get(toarray);
+					if (obj.len <= value)
+						obj.len = value + 1;
+				}
+				return toarray + "[" + value + "]";
 			case "EBlock":
 				var ret = "";
 				var array:Array<Dynamic> = expr.getParameters()[0];
