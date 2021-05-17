@@ -257,7 +257,7 @@ class OpenFLShaderMacro {
 			trace("fragment=\n" + fragment);
 			trace("vertex=\n" + vertex);
 		}
-		
+
 		var openflGLSource = [];
 		if (maps.exists("fragment")) {
 			openflGLSource.push({
