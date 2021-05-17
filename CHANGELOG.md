@@ -8,3 +8,4 @@ gl_openfl_ColorOffsetv;
 //是否存在颜色转换
 gl_openfl_HasColorTransform;
 ```
+- 2、新增`vertex`顶点着色器`:glVertexSource`支持。
