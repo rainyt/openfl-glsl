@@ -40,7 +40,8 @@ class OpenFLShaderMacro {
 			return fields;
 		}
 		var shader = "\n";
-		var defines:Array<String> = [];
+		var vdefines:Array<String> = [];
+		var fdefines:Array<String> = [];
 		var glslFuncs:Array<String> = [];
 		var vars:Map<String, String> = [];
 		var maps:Map<String, String> = [];
@@ -109,7 +110,7 @@ class OpenFLShaderMacro {
 								fields.push(newDefineField);
 						}
 						if (line != null) {
-							defines.push(line);
+							(field.name == "fragment" ? fdefines : vdefines).push(line);
 							shader += line;
 						}
 					}
@@ -175,9 +176,11 @@ class OpenFLShaderMacro {
 		// 创建new
 		var vertex = "#pragma header\n";
 		var fragment = "#pragma header\n";
-		for (d in defines) {
-			vertex += d;
+		for (d in fdefines) {
 			fragment += d;
+		}
+		for (d in vdefines) {
+			vertex += d;
 		}
 		// 方法定义
 		for (index => value in glslFuncs) {

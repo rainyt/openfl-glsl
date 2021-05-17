@@ -95,10 +95,17 @@ class Shader extends glsl.OpenFLShader {
 ```
 
 ## @:define
-在指定的`fragment()`方法中，新增`@:define`可以对该着色器添加宏定义：
+在指定的`fragment()`或者`vertex()`方法中，新增`@:define`可以对该着色器添加宏定义，他们之间定义的宏不会互相定义。
 ```haxe
 @:define("VALUE 10.")
 override public function fragment(){
+	color.r = 10 / VALUE;
+}
+```
+或者
+```haxe
+@:define("VALUE 10.")
+override public function vertex(){
 	color.r = 10 / VALUE;
 }
 ```

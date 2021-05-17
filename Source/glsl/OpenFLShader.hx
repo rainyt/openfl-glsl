@@ -95,6 +95,10 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	 */
 	public function vertex():Void {}
 
+	#if !zygame
+	private var __intervalId:Int = -1;
+	#end
+
 	public function new() {
 		super();
 	}
@@ -107,6 +111,10 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 			Start.current.removeToUpdate(this);
 		#else
 		// Use OpenFL Event.EVENT_FRAME
+		if (__intervalId != -1)
+			openfl.Lib.clearInterval(__intervalId);
+		if (bool)
+			__intervalId = openfl.Lib.setInterval(onFrame, 0);
 		#end
 	}
 
@@ -116,10 +124,12 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	public function dispose():Void {
 		#if zygame
 		Start.current.removeToUpdate(this);
+		#else
+		if (__intervalId != -1)
+			openfl.Lib.clearInterval(__intervalId);
+		__intervalId = -1;
 		#end
 	}
 
-	#if zygame
 	public function onFrame():Void {}
-	#end
 }
