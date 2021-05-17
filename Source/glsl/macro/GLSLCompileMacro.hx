@@ -12,6 +12,7 @@ import haxe.macro.Context;
  * In Haxe, you can use it normally: Array<T>, int, float, bool, vec2, vec3, vec4, mat2, mat3, mat4, etc.
  */
 class GLSLCompileMacro {
+	#if macro
 	/**
 	 * 数组使用量映射关系
 	 */
@@ -33,6 +34,11 @@ class GLSLCompileMacro {
 	public static var varying:Map<String, String>;
 
 	/**
+	 * attribute映射
+	 */
+	public static var attribute:Map<String, String>;
+
+	/**
 	 * 历史上一次类型记录
 	 */
 	public static var lastType:String;
@@ -42,7 +48,6 @@ class GLSLCompileMacro {
 	 * @param platform 定义编译平台，目前支持openfl、glsl
 	 * @return Array<Field>
 	 */
-	#if macro
 	macro public static function build(platform:String = "openfl"):Array<Field> {
 		var pos:Position = Context.currentPos();
 		var fields = Context.getBuildFields();
@@ -63,13 +68,15 @@ class GLSLCompileMacro {
 		arrayUidByName = [];
 		uniform = [];
 		varying = [];
+		attribute = [];
 		for (field in fields) {
 			switch (field.kind.getName()) {
 				case "FVar":
 					var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
 					var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
 					var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
-					if (isUniform || isGLSLVar || isVarying) {
+					var isAttribute = field.meta.filter(f -> f.name == ":attribute").length > 0;
+					if (isUniform || isGLSLVar || isVarying || isAttribute) {
 						// 变量定义
 						var type:ExprDef = cast field.kind.getParameters()[0];
 						var value = cast field.kind.getParameters()[1];
@@ -77,41 +84,20 @@ class GLSLCompileMacro {
 						var isArray = c.indexOf("$array") != -1;
 						if (isArray)
 							c = c.substr(0, c.lastIndexOf("$"));
-						if (isVarying) {
-							if (value == null) {
-								varying.set(field.name, "varying " + c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
-							} else {
-								varying.set(field.name,
-									"varying "
-									+ c
-									+ " "
-									+ field.name
-									+ (isArray ? "$[" + arrayUid + "]" : "")
-									+ "="
-									+ toExprValue(value.expr)
-									+ ";\n");
-							}
-						} else if (isUniform) {
-							if (value == null) {
-								uniform.set(field.name, "uniform " + c + " u_" + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
-							} else {
-								uniform.set(field.name,
-									"uniform "
-									+ c
-									+ " u_"
-									+ field.name
-									+ (isArray ? "$[" + arrayUid + "]" : "")
-									+ "="
-									+ toExprValue(value.expr)
-									+ ";\n");
-							}
-						} else {
-							if (value == null) {
-								vars.set(field.name, c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + ";\n");
-							} else {
-								vars.set(field.name, c + " " + field.name + (isArray ? "$[" + arrayUid + "]" : "") + "=" + toExprValue(value.expr) + ";\n");
-							}
+						var varmap:Map<String, String> = isAttribute ? attribute : isVarying ? varying : isUniform ? uniform : vars;
+						var vardefine = isAttribute ? "attribute" : isVarying ? "varying" : isUniform ? "uniform" : "";
+						varmap.set(field.name,
+							vardefine
+							+ " "
+							+ c
+							+ (isUniform && platform == "openfl" ? " u_" : " ")
+							+ field.name
+							+ (isArray ? "$[" + arrayUid + "]" : ""));
+						if (value != null) {
+							varmap.set(field.name, varmap.get(field.name) + "=" + toExprValue(value.expr));
 						}
+						varmap.set(field.name, varmap.get(field.name) + ";\n");
+
 						// 如果是数组，则需要定义数量
 						if (isArray) {
 							arrayUidByName.set(field.name, {
@@ -169,8 +155,12 @@ class GLSLCompileMacro {
 							+ "("
 							+ toExprArgs(field.kind.getParameters()[0].args)
 							+ "){");
-					else
-						maps.set(field.name, maps.get(field.name) + "\n void main(void){#pragma body\n");
+					else {
+						if (platform == "glsl")
+							maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
+						else
+							maps.set(field.name, maps.get(field.name) + "\n void main(void){#pragma body\n");
+					}
 					var func:ExprDef = cast field.kind.getParameters()[0].expr.expr;
 					var array:Array<Dynamic> = func.getParameters()[0];
 					for (index => value in array) {
@@ -217,8 +207,8 @@ class GLSLCompileMacro {
 			}
 		}
 		// 创建new
-		var vertex = "#pragma header\n";
-		var fragment = "#pragma header\n";
+		var vertex = platform == "glsl" ? "" : "#pragma header\n";
+		var fragment = platform == "glsl" ? "" : "#pragma header\n";
 		for (d in fdefines) {
 			fragment += d;
 		}
@@ -229,6 +219,10 @@ class GLSLCompileMacro {
 		for (index => value in glslFuncs) {
 			vertex += maps.get(value);
 			fragment += maps.get(value);
+		}
+		// attribute定义
+		for (key => value in attribute) {
+			vertex += value;
 		}
 		// uniform定义
 		for (key => value in uniform) {
@@ -307,8 +301,8 @@ class GLSLCompileMacro {
 					name: "fragmentSource",
 					doc: null,
 					meta: [],
-					access: [APublic,AStatic],
-					kind: FVar(macro:String,macro $v{fragment}),
+					access: [APublic, AStatic],
+					kind: FVar(macro:String, macro $v{fragment}),
 					pos: pos
 				});
 			}
@@ -317,8 +311,8 @@ class GLSLCompileMacro {
 					name: "vertexSource",
 					doc: null,
 					meta: [],
-					access: [APublic,AStatic],
-					kind: FVar(macro:String,macro $v{vertex}),
+					access: [APublic, AStatic],
+					kind: FVar(macro:String, macro $v{vertex}),
 					pos: pos
 				});
 			}

@@ -66,6 +66,14 @@ Reference examples:
 }
 ```
 
+## @:attribute
+在类中添加`@:attribute`变量，可创建出attribute变量：
+```haxe
+class Shader extends glsl.OpenFLShader {
+	@:attribute public var time:Float;
+}
+```
+
 ## @:uniform
 在类中添加`@:uniform`变量，当需要提供参数时，需要通过`u_`+变量名组合赋值：
 Add the ': uniform' variable to the class. When you need to provide parameters, you need to use the 'U'_`+ Variable name combination assignment:
