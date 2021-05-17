@@ -65,6 +65,10 @@ Reference examples:
 	return v.x + v.y;
 }
 ```
+他还可以将变量转义成GLSL：
+```haxe
+@:glsl public var a:Vec2 = vec2(1,2);
+```
 
 ## @:attribute
 在类中添加`@:attribute`变量，可创建出attribute变量：
@@ -106,6 +110,7 @@ class Shader extends glsl.OpenFLShader {
 
 ## @:define
 在指定的`fragment()`或者`vertex()`方法中，新增`@:define`可以对该着色器添加宏定义，他们之间定义的宏不会互相定义。
+In the specified `fragment()` or `vertex()` method, the new `@:define` can add macro definitions to the shader, and the macros defined between them will not define each other.
 ```haxe
 @:define("VALUE 10.")
 override public function fragment(){
@@ -126,3 +131,9 @@ override public function vertex(){
 @:precision("highp float")
 override public function fragment(){}
 ```
+
+## Haxe to GLSL
+现在可以直接在Haxe中编写GLSL，可以参考例子(Now you can write GLSL directly in Haxe, you can refer to the example)：[Click Me](https://github.com/rainyt/openfl-glsl-samples/blob/main/Source/glsl/Haxe2GLSL.hx)
+
+使用HaxeToGLSL时，你可以访问类的`fragmentSource`和`vertexSource`的静态变量。
+When using HaxeToGLSL, you can access the static variables of the class `fragmentSource` and `vertexSource`.
