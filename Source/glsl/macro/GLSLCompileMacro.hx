@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import sys.FileSystem;
 import sys.io.File;
 import haxe.macro.Type.ClassField;
 import glsl.utils.GLSLFormat;
@@ -172,6 +173,8 @@ class GLSLCompileMacro {
 		vertex = GLSLFormat.format(vertex);
 
 		if (output != null) {
+			if(!FileSystem.exists(output))
+				FileSystem.createDirectory(output);
 			if (maps.exists("fragment"))
 				File.saveContent(output + "/" + Context.getLocalClass() + ".frag",fragment);
 			if (maps.exists("vertex"))
