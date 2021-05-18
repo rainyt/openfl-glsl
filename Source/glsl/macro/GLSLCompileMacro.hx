@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import glsl.utils.GLSLFormat;
 #if macro
 import haxe.macro.Expr;
 import haxe.macro.Context;
@@ -155,6 +156,10 @@ class GLSLCompileMacro {
 			fragment = StringTools.replace(fragment, "$[" + value.id + "]", "[" + value.len + "]");
 			vertex = StringTools.replace(vertex, "$[" + value.id + "]", "[" + value.len + "]");
 		}
+
+		// 格式化
+		fragment = GLSLFormat.format(fragment);
+		vertex = GLSLFormat.format(vertex);
 
 		if (isDebug) {
 			trace("class=", Context.getLocalClass());
