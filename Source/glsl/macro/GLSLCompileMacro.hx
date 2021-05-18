@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import haxe.macro.Type.ClassField;
 import glsl.utils.GLSLFormat;
 #if macro
 import haxe.macro.Expr;
@@ -109,11 +110,13 @@ class GLSLCompileMacro {
 		attribute = [];
 
 		parserGLSL(fields);
-		var localClass = Context.getLocalClass().get();
-		var superClass = localClass.superClass != null ? localClass.superClass.t.get() : null;
-		var parent = superClass;
-		if (parent != null)
-			parserGLSL(parent.fields.get(), false);
+		if (platform == "glsl") {
+			var localClass = Context.getLocalClass().get();
+			var superClass = localClass.superClass != null ? localClass.superClass.t.get() : null;
+			var parent = superClass;
+			if (parent != null)
+				parserGLSL(parent.fields.get(), false);
+		}
 
 		// 创建new
 		var vertex = platform == "glsl" ? "" : "#pragma header\n";
@@ -165,8 +168,10 @@ class GLSLCompileMacro {
 			trace("class=", Context.getLocalClass());
 			trace("uniform=" + uniform);
 			trace("\nGLSL脚本：\n" + shader);
-			trace("fragment=\n" + fragment);
-			trace("vertex=\n" + vertex);
+			if (maps.exists("fragment"))
+				trace("fragment=\n" + fragment);
+			if (maps.exists("vertex"))
+				trace("vertex=\n" + vertex);
 		}
 		if (platform == "openfl") {
 			var openflGLSource = [];
@@ -237,8 +242,12 @@ class GLSLCompileMacro {
 		var pos:Position = Context.currentPos();
 		for (field in fields) {
 			if (field.meta.get != null) {
-				var expr = field.expr();
-				var value = expr == null ? null : toExprValue(expr.expr);
+				var c:ClassField = cast field;
+				// 不能调用expr，否则会引起Redefinition of variable time in subclass is not allowed. Previously declared at XXXX.XXXX的问题
+				// var expr = field.expr();
+				// var value = expr == null ? null : toExprValue(expr.expr);
+				var expr = null;
+				var value = null;
 				var kind:ExprDef = field.kind;
 				if (kind.getName() == "FVar") {
 					parserGLSLField({
@@ -250,8 +259,9 @@ class GLSLCompileMacro {
 						pos: Context.currentPos()
 					}, hasVertexFragment);
 				}
-			} else
+			} else {
 				parserGLSLField(field, hasVertexFragment);
+			}
 		}
 	}
 
@@ -342,7 +352,7 @@ class GLSLCompileMacro {
 						+ field.name
 						+ "("
 						+ toExprArgs(field.kind.getParameters()[0].args)
-						+ "){");
+						+ "){\n");
 				else {
 					if (platform == "glsl")
 						maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
@@ -408,6 +418,8 @@ class GLSLCompileMacro {
 		var type = expr.getName();
 		lastType = null;
 		switch (type) {
+			case "TLazy":
+				throw "子类型不能默认赋值(Subtype cannot be assigned by default)";
 			case "TAbstract":
 				var type = Std.string(expr.getParameters()[0]);
 				lastType = type;
@@ -564,7 +576,7 @@ class GLSLCompileMacro {
 				return data;
 			case "EField":
 				var value = toExprValue(expr.getParameters()[0].expr);
-				if (uniform.exists(value))
+				if (uniform.exists(value) && platform == "openfl")
 					value = "u_" + value;
 				if (value == "this") {
 					value = expr.getParameters()[1];
