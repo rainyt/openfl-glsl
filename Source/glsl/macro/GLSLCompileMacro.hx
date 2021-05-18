@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import sys.io.File;
 import haxe.macro.Type.ClassField;
 import glsl.utils.GLSLFormat;
 #if macro
@@ -82,6 +83,11 @@ class GLSLCompileMacro {
 	public static var isDebug:Bool;
 
 	/**
+	 * 是否输出，需要输出时，需要使用`-D output=./bin`定义输出目录
+	 */
+	public static var output:String;
+
+	/**
 	 * 自动编译buildShader
 	 * @param platform 定义编译平台，目前支持openfl、glsl
 	 * @return Array<Field>
@@ -89,6 +95,7 @@ class GLSLCompileMacro {
 	macro public static function build(platform:String = "openfl"):Array<Field> {
 		GLSLCompileMacro.platform = platform;
 		fields = Context.getBuildFields();
+		output = Context.getDefines().get("output");
 		shader = "\n";
 		var pos:Position = Context.currentPos();
 		isDebug = Context.getLocalClass().get().meta.has(":debug");
@@ -163,6 +170,13 @@ class GLSLCompileMacro {
 		// 格式化
 		fragment = GLSLFormat.format(fragment);
 		vertex = GLSLFormat.format(vertex);
+
+		if (output != null) {
+			if (maps.exists("fragment"))
+				File.saveContent(output + "/" + Context.getLocalClass() + ".frag",fragment);
+			if (maps.exists("vertex"))
+				File.saveContent(output + "/" + Context.getLocalClass() + ".vert",vertex);
+		}
 
 		if (isDebug) {
 			trace("class=", Context.getLocalClass());
