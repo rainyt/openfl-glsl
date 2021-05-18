@@ -363,7 +363,7 @@ class GLSLCompileMacro {
 							// 调用方法
 							var value = toExprValue(expr);
 							if (value.indexOf("null") != 0) line += "  " + value;
-						case "EBinop", "EIf", "EReturn", "EFor", "EConst", "EUnop":
+						case "EBinop", "EIf", "EReturn", "EFor", "EConst", "EUnop", "EWhile":
 							// 赋值
 							line += "  " + toExprValue(expr);
 						default:
@@ -435,6 +435,10 @@ class GLSLCompileMacro {
 		var ret = "#invalidValue#";
 		var type = expr.getName();
 		switch (type) {
+			case "OpEq":
+				return "==";
+			case "EWhile":
+				return "while(" + toExprValue(expr.getParameters()[0].expr) + "){" + toExprValue(expr.getParameters()[1].expr) + "}";
 			case "TFunction":
 				return expr.getParameters()[0];
 			case "TConst":
@@ -545,10 +549,10 @@ class GLSLCompileMacro {
 				var content = toExprValue(expr.getParameters()[1].expr);
 				var elsecontent = expr.getParameters()[2];
 				if (ifcontent != null) {
-					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){" + content + ";}";
+					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + "\n}";
 				}
 				if (elsecontent != null) {
-					data += "else{" + toExprValue(elsecontent.expr, ["elseif"]) + ";}";
+					data += "else{\n" + toExprValue(elsecontent.expr) + "\n}";
 				}
 				return data;
 			case "EField":
