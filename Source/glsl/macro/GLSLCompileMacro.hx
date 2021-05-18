@@ -479,7 +479,7 @@ class GLSLCompileMacro {
 			case "OpEq":
 				return "==";
 			case "EWhile":
-				return "while(" + toExprValue(expr.getParameters()[0].expr) + "){" + toExprValue(expr.getParameters()[1].expr) + "}";
+				return "while(" + toExprValue(expr.getParameters()[0].expr) + "){\n" + toExprValue(expr.getParameters()[1].expr) + "\n}";
 			case "TFunction":
 				return expr.getParameters()[0];
 			case "TConst":
