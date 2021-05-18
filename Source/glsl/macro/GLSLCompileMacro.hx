@@ -173,12 +173,12 @@ class GLSLCompileMacro {
 		vertex = GLSLFormat.format(vertex);
 
 		if (output != null) {
-			if(!FileSystem.exists(output))
+			if (!FileSystem.exists(output))
 				FileSystem.createDirectory(output);
 			if (maps.exists("fragment"))
-				File.saveContent(output + "/" + Context.getLocalClass() + ".frag",fragment);
+				File.saveContent(output + "/" + Context.getLocalClass() + ".frag", fragment);
 			if (maps.exists("vertex"))
-				File.saveContent(output + "/" + Context.getLocalClass() + ".vert",vertex);
+				File.saveContent(output + "/" + Context.getLocalClass() + ".vert", vertex);
 		}
 
 		if (isDebug) {
@@ -590,10 +590,10 @@ class GLSLCompileMacro {
 				var content = toExprValue(expr.getParameters()[1].expr);
 				var elsecontent = expr.getParameters()[2];
 				if (ifcontent != null) {
-					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + "\n}";
+					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + ";\n}";
 				}
 				if (elsecontent != null) {
-					data += "else{\n" + toExprValue(elsecontent.expr) + "\n}";
+					data += "else{\n" + toExprValue(elsecontent.expr) + ";\n}";
 				}
 				return data;
 			case "EField":

@@ -6,24 +6,6 @@ import zygame.core.Start;
 #if openfl
 import openfl.display.DisplayObjectShader;
 
-function float(a:Dynamic):Float {
-	return a;
-}
-
-function int(a:Dynamic):Int {
-	return a;
-}
-
-/**
- * 获取Texture2D颜色
- * @param texture 纹理对象
- * @param vec2 UV位置
- * @return Vec4
- */
-function texture2D(texture:Dynamic, vec2:Vec2):Vec4 {
-	return null;
-}
-
 @:autoBuild(glsl.macro.GLSLCompileMacro.build())
 class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core.Refresher #end {
 	/** 
@@ -75,6 +57,11 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	 * 最终值输出
 	 */
 	public var gl_FragColor:Vec4;
+
+	/**
+	 * gl_FragCoord，舞台的像素比，单位为px
+	 */
+	public var gl_FragCoord:Vec2;
 
 	/**
 	 * 最终顶点坐标输出
