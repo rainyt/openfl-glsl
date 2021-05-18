@@ -410,10 +410,12 @@ class GLSLCompileMacro {
 		switch (type) {
 			case "TAbstract":
 				var type = Std.string(expr.getParameters()[0]);
-				return type.charAt(0).toLowerCase() + type.substr(1);
+				lastType = type;
+				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			case "TPType":
 				expr = expr.getParameters()[0];
-				return expr.getParameters()[0].name;
+				lastType = expr.getParameters()[0].name;
+				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			case "ENew", "TPath":
 				lastType = expr.getParameters()[0].name;
 				if (lastType == "Array") {
@@ -601,7 +603,7 @@ class GLSLCompileMacro {
 						value = "u_" + value;
 					if (value.indexOf("gl_openfl") == 0)
 						value = value.substr(3);
-					if ((ctype == "CInt" || ctype == "CFloat") && lastType != null && lastType != "int" && value.indexOf(".") == -1) {
+					if ((ctype == "CInt" || ctype == "CFloat") && lastType != null && lastType.toLowerCase() != "int" && value.indexOf(".") == -1) {
 						value = value + ".";
 					}
 				}
