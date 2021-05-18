@@ -39,9 +39,45 @@ class GLSLCompileMacro {
 	public static var attribute:Map<String, String>;
 
 	/**
+	 * vexter的define实现
+	 */
+	public static var vdefines:Array<String>;
+
+	/**
+	 * fragment的define实现
+	 */
+	public static var fdefines:Array<String>;
+
+	/**
+	 * glsl方法名映射关系
+	 */
+	public static var glslFuncs:Array<String>;
+
+	/**
+	 * glsl通用变量定义
+	 */
+	public static var vars:Map<String, String>;
+
+	/**
+	 * glsl通用方法实现
+	 */
+	public static var maps:Map<String, String>;
+
+	/**
 	 * 历史上一次类型记录
 	 */
 	public static var lastType:String;
+
+	/**
+	 * 编译平台
+	 */
+	public static var platform:String;
+
+	public static var shader:String;
+
+	public static var fields:Array<Field>;
+
+	public static var isDebug:Bool;
 
 	/**
 	 * 自动编译buildShader
@@ -49,163 +85,35 @@ class GLSLCompileMacro {
 	 * @return Array<Field>
 	 */
 	macro public static function build(platform:String = "openfl"):Array<Field> {
+		GLSLCompileMacro.platform = platform;
+		fields = Context.getBuildFields();
+		shader = "\n";
 		var pos:Position = Context.currentPos();
-		var fields = Context.getBuildFields();
-		var isDebug = Context.getLocalClass().get().meta.has(":debug");
+		isDebug = Context.getLocalClass().get().meta.has(":debug");
 		var noShader = Context.getLocalClass().get().meta.has(":noshader");
 		var info = Context.getPosInfos(pos);
 		Context.registerModuleDependency(Context.getLocalModule(), info.file);
 		if (noShader) {
 			return fields;
 		}
-		var shader = "\n";
-		var vdefines:Array<String> = [];
-		var fdefines:Array<String> = [];
-		var glslFuncs:Array<String> = [];
-		var vars:Map<String, String> = [];
-		var maps:Map<String, String> = [];
+		vdefines = [];
+		fdefines = [];
+		glslFuncs = [];
+		vars = [];
+		maps = [];
 		arrayUid = 0;
 		arrayUidByName = [];
 		uniform = [];
 		varying = [];
 		attribute = [];
-		for (field in fields) {
-			switch (field.kind.getName()) {
-				case "FVar":
-					var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
-					var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
-					var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
-					var isAttribute = field.meta.filter(f -> f.name == ":attribute").length > 0;
-					if (isUniform || isGLSLVar || isVarying || isAttribute) {
-						// 变量定义
-						var type:ExprDef = cast field.kind.getParameters()[0];
-						var value = cast field.kind.getParameters()[1];
-						var c = type == null ? toExprType(value.expr) : toExprType(type);
-						var isArray = c.indexOf("$array") != -1;
-						if (isArray)
-							c = c.substr(0, c.lastIndexOf("$"));
-						var varmap:Map<String, String> = isAttribute ? attribute : isVarying ? varying : isUniform ? uniform : vars;
-						var vardefine = isAttribute ? "attribute" : isVarying ? "varying" : isUniform ? "uniform" : "";
-						varmap.set(field.name,
-							vardefine
-							+ " "
-							+ c
-							+ (isUniform && platform == "openfl" ? " u_" : " ")
-							+ field.name
-							+ (isArray ? "$[" + arrayUid + "]" : ""));
-						if (value != null) {
-							varmap.set(field.name, varmap.get(field.name) + "=" + toExprValue(value.expr));
-						}
-						varmap.set(field.name, varmap.get(field.name) + ";\n");
 
-						// 如果是数组，则需要定义数量
-						if (isArray) {
-							arrayUidByName.set(field.name, {
-								id: arrayUid,
-								len: 1
-							});
-							arrayUid++;
-						}
-						shader += uniform.get(field.name);
-					}
-				case "FFun":
-					// 方法解析
-					var isGLSLFunc = field.meta.filter((f) -> f.name == ":glsl").length != 0;
-					if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
-						continue;
-					if (isGLSLFunc) {
-						glslFuncs.push(field.name);
-					}
-					maps.set(field.name, "");
-					// 定义
-					for (index => value in field.meta) {
-						var line = null;
-						switch (value.name) {
-							case ":precision":
-								var expr:ExprDef = value.params[0].expr.getParameters()[0];
-								line = "precision " + expr.getParameters()[0] + ";\n";
-							case ":define":
-								var expr:ExprDef = value.params[0].expr.getParameters()[0];
-								var defineValue = expr.getParameters()[0];
-								line = "#define " + defineValue + "\n";
-								var newDefineField = {
-									name: defineValue.substr(0, defineValue.indexOf(" ")),
-									doc: null,
-									meta: [],
-									access: [APublic],
-									kind: FVar(macro:Dynamic),
-									pos: pos
-								};
-								fields.push(newDefineField);
-						}
-						if (line != null) {
-							(field.name == "fragment" ? fdefines : vdefines).push(line);
-							shader += line;
-						}
-					}
-					var retType = toExprType(field.kind.getParameters()[0].ret);
-					shader += "\n" + retType + " " + field.name + "(" + toExprArgs(field.kind.getParameters()[0].args) + "){\n";
-					if (isGLSLFunc)
-						maps.set(field.name,
-							maps.get(field.name)
-							+ "\n"
-							+ retType
-							+ " "
-							+ field.name
-							+ "("
-							+ toExprArgs(field.kind.getParameters()[0].args)
-							+ "){");
-					else {
-						if (platform == "glsl")
-							maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
-						else
-							maps.set(field.name, maps.get(field.name) + "\n void main(void){#pragma body\n");
-					}
-					var func:ExprDef = cast field.kind.getParameters()[0].expr.expr;
-					var array:Array<Dynamic> = func.getParameters()[0];
-					for (index => value in array) {
-						var expr:ExprDef = cast value.expr;
-						var line:String = "";
-						switch (expr.getName()) {
-							case "EField":
-							// 已定义对象赋值
-							case "EVars":
-								// 定义局部变量
-								var vars = expr.getParameters()[0];
-								var varvalue = vars[0].expr;
-								line += "  " + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
-								// trace(varvalue);
-								if (varvalue != null) line += "=" + toExprValue(varvalue.expr);
-							case "ECall":
-								// 调用方法
-								var value = toExprValue(expr);
-								if (value.indexOf("null") != 0) line += "  " + value;
-							case "EBinop":
-								// 赋值
-								line += "  " + toExprValue(expr);
-							case "EIf":
-								// If判断
-								line += "  " + toExprValue(expr);
-							case "EReturn":
-								// return
-								line = "  " + toExprValue(expr);
-							case "EFor":
-								// for
-								line = "  " + toExprValue(expr);
-							case "EConst":
-								line = "  " + toExprValue(expr);
-							default:
-								throw "意外的运行符：" + expr.getName();
-						}
-						if (line != "") {
-							maps.set(field.name, maps.get(field.name) + line + ";\n");
-							shader += line + ";\n";
-						}
-					}
-					shader += "\n}\n";
-					maps.set(field.name, maps.get(field.name) + "\n}\n");
-			}
-		}
+		parserGLSL(fields);
+		var localClass = Context.getLocalClass().get();
+		var superClass = localClass.superClass != null ? localClass.superClass.t.get() : null;
+		var parent = superClass;
+		if (parent != null)
+			parserGLSL(parent.fields.get(), false);
+
 		// 创建new
 		var vertex = platform == "glsl" ? "" : "#pragma header\n";
 		var fragment = platform == "glsl" ? "" : "#pragma header\n";
@@ -320,6 +228,157 @@ class GLSLCompileMacro {
 		return fields;
 	}
 
+	public static function parserGLSL(fields:Array<Dynamic>, hasVertexFragment:Bool = true):Void {
+		var pos:Position = Context.currentPos();
+		for (field in fields) {
+			if (field.meta.get != null) {
+				var expr = field.expr();
+				var value = expr == null ? null : toExprValue(expr.expr);
+				var kind:ExprDef = field.kind;
+				if (kind.getName() == "FVar") {
+					parserGLSLField({
+						name: field.name,
+						doc: null,
+						meta: field.meta.get(),
+						access: [APublic],
+						kind: expr == null ? FVar(field.type) : FVar(expr.t, macro $v{value}),
+						pos: Context.currentPos()
+					}, hasVertexFragment);
+				}
+			} else
+				parserGLSLField(field, hasVertexFragment);
+		}
+	}
+
+	public static function parserGLSLField(field:Field, hasVertexFragment:Bool = true):Void {
+		switch (field.kind.getName()) {
+			case "FVar":
+				var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
+				var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
+				var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
+				var isAttribute = field.meta.filter(f -> f.name == ":attribute").length > 0;
+				if (isUniform || isGLSLVar || isVarying || isAttribute) {
+					// 变量定义
+					var type:ExprDef = cast field.kind.getParameters()[0];
+					var value = cast field.kind.getParameters()[1];
+					var c = type == null ? toExprType(value.expr) : toExprType(type);
+					var isArray = c.indexOf("$array") != -1;
+					if (isArray)
+						c = c.substr(0, c.lastIndexOf("$"));
+					var varmap:Map<String, String> = isAttribute ? attribute : isVarying ? varying : isUniform ? uniform : vars;
+					var vardefine = isAttribute ? "attribute" : isVarying ? "varying" : isUniform ? "uniform" : "";
+					varmap.set(field.name,
+						vardefine
+						+ " "
+						+ c
+						+ (isUniform && platform == "openfl" ? " u_" : " ")
+						+ field.name
+						+ (isArray ? "$[" + arrayUid + "]" : ""));
+					if (value != null) {
+						varmap.set(field.name, varmap.get(field.name) + "=" + toExprValue(value.expr));
+					}
+					varmap.set(field.name, varmap.get(field.name) + ";\n");
+
+					// 如果是数组，则需要定义数量
+					if (isArray) {
+						arrayUidByName.set(field.name, {
+							id: arrayUid,
+							len: 1
+						});
+						arrayUid++;
+					}
+					shader += uniform.get(field.name);
+				}
+			case "FFun":
+				// 方法解析
+				var isGLSLFunc = field.meta.filter((f) -> f.name == ":glsl").length != 0;
+				if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
+					return;
+				if (!hasVertexFragment || (field.name == "vertex" && field.name == "fragment"))
+					return;
+				if (isGLSLFunc) {
+					glslFuncs.push(field.name);
+				}
+				maps.set(field.name, "");
+				// 定义
+				for (index => value in field.meta) {
+					var line = null;
+					switch (value.name) {
+						case ":precision":
+							var expr:ExprDef = value.params[0].expr.getParameters()[0];
+							line = "precision " + expr.getParameters()[0] + ";\n";
+						case ":define":
+							var expr:ExprDef = value.params[0].expr.getParameters()[0];
+							var defineValue = expr.getParameters()[0];
+							line = "#define " + defineValue + "\n";
+							var newDefineField = {
+								name: defineValue.substr(0, defineValue.indexOf(" ")),
+								doc: null,
+								meta: [],
+								access: [APublic],
+								kind: FVar(macro:Dynamic),
+								pos: Context.currentPos()
+							};
+							fields.push(newDefineField);
+					}
+					if (line != null) {
+						(field.name == "fragment" ? fdefines : vdefines).push(line);
+						shader += line;
+					}
+				}
+				var retType = toExprType(field.kind.getParameters()[0].ret);
+				shader += "\n" + retType + " " + field.name + "(" + toExprArgs(field.kind.getParameters()[0].args) + "){\n";
+				if (isGLSLFunc)
+					maps.set(field.name,
+						maps.get(field.name)
+						+ "\n"
+						+ retType
+						+ " "
+						+ field.name
+						+ "("
+						+ toExprArgs(field.kind.getParameters()[0].args)
+						+ "){");
+				else {
+					if (platform == "glsl")
+						maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
+					else
+						maps.set(field.name, maps.get(field.name) + "\n void main(void){#pragma body\n");
+				}
+				var func:ExprDef = cast field.kind.getParameters()[0].expr.expr;
+				var array:Array<Dynamic> = func.getParameters()[0];
+				for (index => value in array) {
+					var expr:ExprDef = cast value.expr;
+					var line:String = "";
+					switch (expr.getName()) {
+						case "EField":
+						// 已定义对象赋值
+						case "EVars":
+							// 定义局部变量
+							var vars = expr.getParameters()[0];
+							var varvalue = vars[0].expr;
+							line += "  " + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
+							// trace(varvalue);
+							if (varvalue != null) line += "=" + toExprValue(varvalue.expr);
+						case "ECall":
+							// 调用方法
+							var value = toExprValue(expr);
+							if (value.indexOf("null") != 0) line += "  " + value;
+						case "EBinop", "EIf", "EReturn", "EFor", "EConst", "EUnop":
+							// 赋值
+							line += "  " + toExprValue(expr);
+						default:
+							throw "意外的运行符：" + expr.getName();
+					}
+					if (line != "") {
+						maps.set(field.name, maps.get(field.name) + line + ";\n");
+						shader += line + ";\n";
+					}
+				}
+				shader += "\n}\n";
+				maps.set(field.name, maps.get(field.name) + "\n}\n");
+		}
+	}
+
 	/**
 	 * 解析Args参数
 	 * @param array 
@@ -344,6 +403,9 @@ class GLSLCompileMacro {
 		var type = expr.getName();
 		lastType = null;
 		switch (type) {
+			case "TAbstract":
+				var type = Std.string(expr.getParameters()[0]);
+				return type.charAt(0).toLowerCase() + type.substr(1);
 			case "TPType":
 				expr = expr.getParameters()[0];
 				return expr.getParameters()[0].name;
@@ -373,12 +435,41 @@ class GLSLCompileMacro {
 		var ret = "#invalidValue#";
 		var type = expr.getName();
 		switch (type) {
+			case "TFunction":
+				return expr.getParameters()[0];
+			case "TConst":
+				expr = expr.getParameters()[0];
+				return expr.getParameters()[0];
+			case "OpUShr":
+				return ">>>";
+			case "OpMod":
+				return "%";
+			case "OpShl":
+				return "<<";
+			case "OpShr":
+				return ">>";
+			case "OpXor":
+				return "^";
+			case "OpAnd":
+				return "&";
+			case "OpOr":
+				return "|";
+			case "OpBoolAnd":
+				return " && ";
+			case "OpNotEq":
+				return "!=";
+			case "OpBoolOr":
+				return " || ";
 			case "OpSub":
 				return "-";
 			case "OpGt":
 				return ">";
+			case "OpGte":
+				return ">=";
 			case "OpLt":
 				return "<";
+			case "OpLte":
+				return "<=";
 			case "OpAssignOp":
 				return toExprValue(expr.getParameters()[0]) + "=";
 			case "OpAssign":
@@ -393,6 +484,20 @@ class GLSLCompileMacro {
 				return "...";
 			case "OpIn":
 				return "in";
+			case "OpNot":
+				return "!";
+			case "OpIncrement":
+				return "++";
+			case "OpDecrement":
+				return "--";
+			case "OpNeg":
+				return "-";
+			case "EUnop":
+				var bool = expr.getParameters()[1];
+				if (!bool)
+					return toExprValue(expr.getParameters()[0]) + toExprValue(expr.getParameters()[2].expr);
+				else
+					return toExprValue(expr.getParameters()[2].expr) + toExprValue(expr.getParameters()[0]);
 			case "EParenthesis":
 				return "(" + toExprValue(expr.getParameters()[0].expr) + ")";
 			case "EVars":

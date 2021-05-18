@@ -4,6 +4,12 @@
 Use Haxe to write GLSL. When writing, please make sure that the classes you use are supported by GLSL, and the basic classes are supported by vector-math.
 In Haxe, you can use it normally: Array<T>, int, float, bool, vec2, vec3, vec4, mat2, mat3, mat4, etc.
 
+## Haxelib
+它会在haxelib中同步版本，可通过以下命令安装：
+```shell
+haxelib install openfl-glsl
+```
+
 ## Test.hx
 ```haxe
 @:debug
