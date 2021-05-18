@@ -603,7 +603,10 @@ class GLSLCompileMacro {
 						value = "u_" + value;
 					if (value.indexOf("gl_openfl") == 0)
 						value = value.substr(3);
-					if ((ctype == "CInt" || ctype == "CFloat") && lastType != null && lastType.toLowerCase() != "int" && value.indexOf(".") == -1) {
+					if ((ctype == "CInt" || ctype == "CFloat" || ctype == "CString")
+						&& lastType != null
+						&& lastType.toLowerCase() != "int"
+						&& value.indexOf(".") == -1) {
 						value = value + ".";
 					}
 				}
