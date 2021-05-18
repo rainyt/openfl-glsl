@@ -13,6 +13,10 @@ In Haxe, you can use it normally: Array<T>, int, float, bool, vec2, vec3, vec4, 
 haxelib install openfl-glsl
 ```
 
+## Issues
+如果遇到问题，请第一时间创建Issues告诉我。
+If you encounter problems, please create Issues and let me know as soon as possible.
+
 ## Test.hx
 ```haxe
 @:debug

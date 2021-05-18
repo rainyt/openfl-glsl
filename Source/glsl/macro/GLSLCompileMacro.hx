@@ -265,6 +265,11 @@ class GLSLCompileMacro {
 		}
 	}
 
+	/**
+	 * 解析类里的每个定义：变量、方法
+	 * @param field 
+	 * @param hasVertexFragment 
+	 */
 	public static function parserGLSLField(field:Field, hasVertexFragment:Bool = true):Void {
 		switch (field.kind.getName()) {
 			case "FVar":
