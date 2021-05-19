@@ -135,11 +135,7 @@ class GLSLCompileMacro {
 		for (d in vdefines) {
 			vertex += d;
 		}
-		// 方法定义
-		for (index => value in glslFuncs) {
-			vertex += maps.get(value);
-			fragment += maps.get(value);
-		}
+		
 		// attribute定义
 		for (key => value in attribute) {
 			vertex += value;
@@ -158,6 +154,11 @@ class GLSLCompileMacro {
 		for (key => value in vars) {
 			vertex += value;
 			fragment += value;
+		}
+		// 方法定义
+		for (index => value in glslFuncs) {
+			vertex += maps.get(value);
+			fragment += maps.get(value);
 		}
 		fragment += maps.get("fragment");
 		vertex += maps.get("vertex");
@@ -564,6 +565,10 @@ class GLSLCompileMacro {
 				ret += "  " + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
 				if (varvalue != null)
 					return ret + "=" + toExprValue(varvalue.expr);
+			case "EArrayDecl":
+				var array:Array<Expr> = expr.getParameters()[0];
+				var t = lastType;
+				return StringTools.replace(t,"$array","") +"[](" + toExprListValue(array) +  ")";
 			case "EArray":
 				lastType = "int";
 				var toarray = toExprValue(expr.getParameters()[0].expr);
