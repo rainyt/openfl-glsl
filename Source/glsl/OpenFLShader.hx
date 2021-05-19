@@ -61,7 +61,7 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 	/**
 	 * gl_FragCoord，舞台的像素比，单位为px
 	 */
-	public var gl_FragCoord:Vec2;
+	public var gl_FragCoord:Vec4;
 
 	/**
 	 * 最终顶点坐标输出

@@ -407,8 +407,14 @@ class GLSLCompileMacro {
 							throw "意外的运行符：" + expr.getName();
 					}
 					if (line != "") {
-						maps.set(field.name, maps.get(field.name) + line + ";\n");
-						shader += line + ";\n";
+						switch (expr.getName()) {
+							case "EIf":
+								maps.set(field.name, maps.get(field.name) + line + "\n");
+								shader += line + "\n";
+							default:
+								maps.set(field.name, maps.get(field.name) + line + ";\n");
+								shader += line + ";\n";
+						}
 					}
 				}
 				shader += "\n}\n";
@@ -593,12 +599,15 @@ class GLSLCompileMacro {
 				var data = "";
 				var ifcontent = toExprValue(expr.getParameters()[0].expr);
 				var content = toExprValue(expr.getParameters()[1].expr);
+				var existEnd = content.lastIndexOf(";\n") == content.length - 2;
 				var elsecontent = expr.getParameters()[2];
 				if (ifcontent != null) {
-					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + ";\n}";
+					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				if (elsecontent != null) {
-					data += "else{\n" + toExprValue(elsecontent.expr) + ";\n}";
+					content = toExprValue(elsecontent.expr);
+					existEnd = content.lastIndexOf(";\n") == content.length - 2;
+					data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				return data;
 			case "EField":
