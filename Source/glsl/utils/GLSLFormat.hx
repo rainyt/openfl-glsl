@@ -26,10 +26,13 @@ class GLSLFormat {
 			}
 			value = value.substr(cat);
 			list[index] = value;
-			for (i in 0...(s - (startAdd ? 1 : 0))) {
-				list[index] = __s + list[index];
-			}
+			if (value != "")
+				for (i in 0...(s - (startAdd ? 1 : 0))) {
+					list[index] = __s + list[index];
+				}
 		}
-		return list.join("\n");
+		return list.filter((k) -> {
+			return k != "";
+		}).join("\n");
 	}
 }

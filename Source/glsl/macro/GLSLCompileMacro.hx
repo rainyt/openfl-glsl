@@ -408,7 +408,7 @@ class GLSLCompileMacro {
 					}
 					if (line != "") {
 						switch (expr.getName()) {
-							case "EIf":
+							case "EIf", "EFor","EWhile":
 								maps.set(field.name, maps.get(field.name) + line + "\n");
 								shader += line + "\n";
 							default:
@@ -578,7 +578,13 @@ class GLSLCompileMacro {
 				var ret = "";
 				var array:Array<Dynamic> = expr.getParameters()[0];
 				for (index => value in array) {
-					ret += toExprValue(value.expr) + ";\n";
+					var e:ExprDef = value.expr;
+					switch (e.getName()) {
+						case "EIf", "EFor","EWhile":
+							ret += toExprValue(value.expr) + "\n";
+						default:
+							ret += toExprValue(value.expr) + ";\n";
+					}
 				}
 				return ret;
 			case "EFor":
@@ -599,14 +605,14 @@ class GLSLCompileMacro {
 				var data = "";
 				var ifcontent = toExprValue(expr.getParameters()[0].expr);
 				var content = toExprValue(expr.getParameters()[1].expr);
-				var existEnd = content.lastIndexOf(";\n") == content.length - 2;
+				var existEnd = content.lastIndexOf(";\n") == content.length - 2 || content.lastIndexOf("}\n") == content.length - 2;
 				var elsecontent = expr.getParameters()[2];
 				if (ifcontent != null) {
 					data += (args != null ? args[0] : "if") + "(" + ifcontent + "){\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				if (elsecontent != null) {
 					content = toExprValue(elsecontent.expr);
-					existEnd = content.lastIndexOf(";\n") == content.length - 2;
+					existEnd = content.lastIndexOf(";\n") == content.length - 2 || content.lastIndexOf("}\n") == content.length - 2;
 					data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				return data;
