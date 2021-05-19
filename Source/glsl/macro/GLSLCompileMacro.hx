@@ -408,7 +408,7 @@ class GLSLCompileMacro {
 					}
 					if (line != "") {
 						switch (expr.getName()) {
-							case "EIf", "EFor","EWhile":
+							case "EIf", "EFor", "EWhile":
 								maps.set(field.name, maps.get(field.name) + line + "\n");
 								shader += line + "\n";
 							default:
@@ -567,7 +567,10 @@ class GLSLCompileMacro {
 			case "EArray":
 				lastType = "int";
 				var toarray = toExprValue(expr.getParameters()[0].expr);
-				var value = Std.parseInt(toExprValue(expr.getParameters()[1].expr));
+				var getIndex = toExprValue(expr.getParameters()[1].expr);
+				var value:Dynamic = Std.parseInt(getIndex);
+				if (value == null)
+					value = getIndex;
 				if (arrayUidByName.exists(toarray)) {
 					var obj = arrayUidByName.get(toarray);
 					if (obj.len <= value)
@@ -580,7 +583,7 @@ class GLSLCompileMacro {
 				for (index => value in array) {
 					var e:ExprDef = value.expr;
 					switch (e.getName()) {
-						case "EIf", "EFor","EWhile":
+						case "EIf", "EFor", "EWhile":
 							ret += toExprValue(value.expr) + "\n";
 						default:
 							ret += toExprValue(value.expr) + ";\n";
