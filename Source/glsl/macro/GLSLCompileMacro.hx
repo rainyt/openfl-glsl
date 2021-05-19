@@ -476,6 +476,8 @@ class GLSLCompileMacro {
 		var ret = "#invalidValue#";
 		var type = expr.getName();
 		switch (type) {
+			case "EBreak":
+				return "break";
 			case "OpEq":
 				return "==";
 			case "EWhile":
