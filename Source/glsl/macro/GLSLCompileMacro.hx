@@ -651,6 +651,8 @@ class GLSLCompileMacro {
 				switch (callName) {
 					case "asVec2", "asVec4", "asVec3":
 						return toExprListValue(args);
+					case "atan2":
+						callName = "atan";
 				}
 				return callName + "(" + toExprListValue(args) + ")";
 			case "ENew":
