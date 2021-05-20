@@ -135,7 +135,7 @@ class GLSLCompileMacro {
 		for (d in vdefines) {
 			vertex += d;
 		}
-		
+
 		// attribute定义
 		for (key => value in attribute) {
 			vertex += value;
@@ -309,7 +309,7 @@ class GLSLCompileMacro {
 						vardefine
 						+ " "
 						+ c
-						+ (isUniform && platform == "openfl" ? " u_" : " ")
+						+ (platform != "openfl" ? " " : (isUniform ? " u_" : isAttribute ? " a_" : " "))
 						+ field.name
 						+ (isArray ? "$[" + arrayUid + "]" : ""));
 					if (value != null) {
@@ -568,7 +568,7 @@ class GLSLCompileMacro {
 			case "EArrayDecl":
 				var array:Array<Expr> = expr.getParameters()[0];
 				var t = lastType;
-				return StringTools.replace(t,"$array","") +"[](" + toExprListValue(array) +  ")";
+				return StringTools.replace(t, "$array", "") + "[](" + toExprListValue(array) + ")";
 			case "EArray":
 				lastType = "int";
 				var toarray = toExprValue(expr.getParameters()[0].expr);
@@ -626,8 +626,12 @@ class GLSLCompileMacro {
 				return data;
 			case "EField":
 				var value = toExprValue(expr.getParameters()[0].expr);
+				if (attribute.exists(value) && platform == "openfl")
+					value = "a_" + value;
 				if (uniform.exists(value) && platform == "openfl")
 					value = "u_" + value;
+				if(isDebug)
+					trace(value,attribute.get(value));
 				if (value == "this") {
 					value = expr.getParameters()[1];
 					if (value.indexOf("gl_openfl") == 0)
@@ -663,7 +667,9 @@ class GLSLCompileMacro {
 				var value:Dynamic = expr.getParameters()[0];
 				var ctype = expr.getName();
 				if (Std.isOfType(value, String)) {
-					if (uniform.exists(value))
+					if (attribute.exists(value) && platform == "openfl")
+						value = "a_" + value;
+					if (uniform.exists(value) && platform == "openfl")
 						value = "u_" + value;
 					if (value.indexOf("gl_openfl") == 0)
 						value = value.substr(3);
