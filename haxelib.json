@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": ["openfl","zygameui"],
   "description": "Allow Haxe to write GLSL directly in OpenFL.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "releasenote": "",
   "contributors": ["rainy"],
   "dependencies": {
