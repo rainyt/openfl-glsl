@@ -630,15 +630,15 @@ class GLSLCompileMacro {
 					value = "a_" + value;
 				if (uniform.exists(value) && platform == "openfl")
 					value = "u_" + value;
-				if(isDebug)
-					trace(value,attribute.get(value));
+				if (isDebug)
+					trace(value, attribute.get(value));
 				if (value == "this") {
 					value = expr.getParameters()[1];
-					if (value.indexOf("gl_openfl") == 0)
+					if (value.indexOf("gl_openfl") == 0 || value.indexOf("gl_bitmap") == 0)
 						value = value.substr(3);
 					return value;
 				}
-				if (value.indexOf("gl_openfl") == 0)
+				if (value.indexOf("gl_openfl") == 0 || value.indexOf("gl_bitmap") == 0)
 					value = value.substr(3);
 				var ret = value + "." + expr.getParameters()[1];
 				if (ret.indexOf("super") == 0)
@@ -671,7 +671,7 @@ class GLSLCompileMacro {
 						value = "a_" + value;
 					if (uniform.exists(value) && platform == "openfl")
 						value = "u_" + value;
-					if (value.indexOf("gl_openfl") == 0)
+					if (value.indexOf("gl_openfl") == 0 || value.indexOf("gl_bitmap") == 0)
 						value = value.substr(3);
 					if ((ctype == "CInt" || ctype == "CFloat" || ctype == "CString")
 						&& lastType != null
