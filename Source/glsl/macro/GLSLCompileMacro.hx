@@ -169,6 +169,10 @@ class GLSLCompileMacro {
 			vertex = StringTools.replace(vertex, "$[" + value.id + "]", "[" + value.len + "]");
 		}
 
+		// #pragma body
+		fragment = StringTools.replace(fragment,"super.fragment();", "#pragma body");
+		vertex = StringTools.replace(vertex,"super.vertex();", "#pragma body");
+
 		// 格式化
 		fragment = GLSLFormat.format(fragment);
 		vertex = GLSLFormat.format(vertex);
@@ -380,7 +384,7 @@ class GLSLCompileMacro {
 					if (platform == "glsl")
 						maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
 					else
-						maps.set(field.name, maps.get(field.name) + "\n void main(void){#pragma body\n");
+						maps.set(field.name, maps.get(field.name) + "\n void main(void){\n");
 				}
 				var func:ExprDef = cast field.kind.getParameters()[0].expr.expr;
 				var array:Array<Dynamic> = func.getParameters()[0];
@@ -394,16 +398,16 @@ class GLSLCompileMacro {
 							// 定义局部变量
 							var vars = expr.getParameters()[0];
 							var varvalue = vars[0].expr;
-							line += "  " + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
+							line += "\t" + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
 							// trace(varvalue);
 							if (varvalue != null) line += "=" + toExprValue(varvalue.expr);
 						case "ECall":
 							// 调用方法
 							var value = toExprValue(expr);
-							if (value.indexOf("null") != 0) line += "  " + value;
+							if (value.indexOf("null") != 0) line += "\t" + value;
 						case "EBinop", "EIf", "EReturn", "EFor", "EConst", "EUnop", "EWhile":
 							// 赋值
-							line += "  " + toExprValue(expr);
+							line += "\t" + toExprValue(expr);
 						default:
 							throw "意外的运行符：" + expr.getName();
 					}
@@ -562,7 +566,7 @@ class GLSLCompileMacro {
 				var ret = "";
 				var vars = expr.getParameters()[0];
 				var varvalue = vars[0].expr;
-				ret += "  " + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
+				ret += "\t" + (vars[0].type != null ? toExprType(vars[0].type) : toExprType(varvalue.expr)) + " " + vars[0].name;
 				if (varvalue != null)
 					return ret + "=" + toExprValue(varvalue.expr);
 			case "EArrayDecl":
@@ -642,7 +646,7 @@ class GLSLCompileMacro {
 					value = value.substr(3);
 				var ret = value + "." + expr.getParameters()[1];
 				if (ret.indexOf("super") == 0)
-					return null;
+					return "super." + expr.getParameters()[1];
 				return ret;
 			case "EBinop":
 				var value1 = toExprValue(expr.getParameters()[1].expr);

@@ -4,7 +4,7 @@ package glsl.utils;
  * GLSL语法格式化
  */
 class GLSLFormat {
-	private static inline var __s:String = "  ";
+	private static inline var __s:String = "\t";
 
 	public static function format(source:String):String {
 		var list = source.split("\n");
@@ -12,7 +12,7 @@ class GLSLFormat {
 		for (index => value in list) {
 			var cat = 0;
 			for (i in 0...value.length) {
-				if (value.charAt(i) != " ") {
+				if (value.charAt(i) != "\t" && value.charAt(i) != " ") {
 					cat = i;
 					break;
 				}
