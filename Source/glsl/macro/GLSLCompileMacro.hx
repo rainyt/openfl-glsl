@@ -625,7 +625,11 @@ class GLSLCompileMacro {
 				if (elsecontent != null) {
 					content = toExprValue(elsecontent.expr);
 					existEnd = content.lastIndexOf(";\n") == content.length - 2 || content.lastIndexOf("}\n") == content.length - 2;
-					data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
+					if(content.indexOf("if") != -1){
+						data += "else " + content;
+					}
+					else
+						data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				return data;
 			case "EField":
