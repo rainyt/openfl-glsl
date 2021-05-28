@@ -1,6 +1,9 @@
 ## 0.0.8
 - 新增：新增OpenFLGraphicsShader支持，可用于OpenFL的`beginShaderFill`中使用。
 
+## 0.0.8
+- 改进：super.fragment()以及super.vertex()如果不实现则可以移除#pragma body。
+
 ## 0.0.7
 - 修复：修复`@:attribute`在OpenFlShader的错误定义，访问`@:attribute`的时候，需要使用`a_变量名`进行访问。
 
