@@ -24,7 +24,7 @@ class GLSLFormat {
 				startAdd = true;
 				s++;
 			}
-			value = value.substr(cat);
+			value = formatLine(value.substr(cat));
 			list[index] = value;
 			if (value != "")
 				for (i in 0...(s - (startAdd ? 1 : 0))) {
@@ -34,5 +34,26 @@ class GLSLFormat {
 		return list.filter((k) -> {
 			return k != "";
 		}).join("\n");
+	}
+
+	private static var _kkeys:String = "*=-/+?:><,";
+
+	private static function formatLine(line:String):String {
+		var ret:Array<String> = [];
+		var lastStr = "";
+		for (i in 0...line.length) {
+			var c = line.charAt(i);
+			if (_kkeys.indexOf(c) != -1 && _kkeys.indexOf(lastStr) == -1 && lastStr != " " && c != ",") {
+				ret.push(" ");
+				ret.push(c);
+			} else if (_kkeys.indexOf(lastStr) != -1 && _kkeys.indexOf(c) == -1 && c != " ") {
+				ret.push(" ");
+				ret.push(c);
+			} else {
+				ret.push(c);
+			}
+			lastStr = c;
+		}
+		return ret.join("");
 	}
 }

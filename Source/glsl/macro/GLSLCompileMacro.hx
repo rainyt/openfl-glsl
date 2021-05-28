@@ -551,7 +551,7 @@ class GLSLCompileMacro {
 			case "OpNeg":
 				return "-";
 			case "ETernary":
-				return "(" + toExprValue(expr.getParameters()[0].expr) + ")? " + toExprValue(expr.getParameters()[1].expr) + " : "
+				return "(" + toExprValue(expr.getParameters()[0].expr) + ")?" + toExprValue(expr.getParameters()[1].expr) + ":"
 					+ toExprValue(expr.getParameters()[2].expr);
 			case "EUnop":
 				var bool = expr.getParameters()[1];

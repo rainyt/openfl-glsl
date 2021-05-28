@@ -1,3 +1,7 @@
+## 0.0.9
+- 改进：改进格式化GLSL，使GLSL看起来更美观。
+- 改进：新增了`else if`的支持。
+
 ## 0.0.8
 - 新增：新增OpenFLGraphicsShader支持，可用于OpenFL的`beginShaderFill`中使用。
 
