@@ -36,9 +36,8 @@ class GLSLFormat {
 		}).join("\n");
 	}
 
-	private static var _kkeys:String = "!*=-/+?:><,"; 
+	private static var _kkeys:String = "!*=-/+?:><,";
 
-	// private static var _leftigones:String = _kkeys + "(){};";
 	private static var _rightigones:String = _kkeys + ")};";
 
 	private static function formatLine(line:String):String {
