@@ -2,11 +2,7 @@
 - 改进：改进格式化GLSL，使GLSL看起来更美观。
 - 改进：新增了`else if`的支持。
 - 改进：使用`/t`代替空格。
-
-## 0.0.8
 - 新增：新增OpenFLGraphicsShader支持，可用于OpenFL的`beginShaderFill`中使用。
-
-## 0.0.8
 - 改进：super.fragment()以及super.vertex()如果不实现则可以移除#pragma body。
 
 ## 0.0.7
