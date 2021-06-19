@@ -36,7 +36,7 @@ class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.c
 	/**
 	 * 纹理对象
 	 */
-	public var gl_bitmap:Dynamic;
+	public var gl_bitmap:Sampler2D;
 
 	/**
 	 * 当前纹理透明度
