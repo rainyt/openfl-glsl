@@ -626,7 +626,7 @@ class GLSLCompileMacro {
 					content = toExprValue(elsecontent.expr);
 					existEnd = content.lastIndexOf(";\n") == content.length - 2 || content.lastIndexOf("}\n") == content.length - 2;
 					if(content.indexOf("if") != -1){
-						data += "else " + content;
+						data += "else {\n" + content + "\n}";
 					}
 					else
 						data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
