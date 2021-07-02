@@ -473,7 +473,7 @@ class GLSLCompileMacro {
 				lastType = expr.getName().substr(1);
 				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
 			default:
-				throw "无法使用" + type + "建立类型关系";
+				throw "无法使用" + type + "建立类型关系" + expr;
 		}
 		return ret;
 	}

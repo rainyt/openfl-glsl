@@ -8,6 +8,12 @@ import openfl.display.DisplayObjectShader;
 
 @:autoBuild(glsl.macro.GLSLCompileMacro.build())
 class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core.Refresher #end {
+
+	/**
+	 * 纹理UV
+	 */
+	public var gl_openfl_TextureCoord:Vec2;
+
 	/** 
 	 * 纹理UV
 	 */
