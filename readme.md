@@ -83,6 +83,9 @@ Reference examples:
 @:glsl public var a:Vec2 = vec2(1,2);
 ```
 
+## @:vertexglsl
+当只想给vertex顶点着色器添加方法时，则使用`@:vertexglsl`，而不需要`@:glsl`。
+
 ## @:attribute
 在类中添加`@:attribute`变量，可创建出attribute变量：
 ```haxe
