@@ -58,6 +58,11 @@ class GLSLCompileMacro {
 	public static var glslFuncs:Array<String>;
 
 	/**
+	 * 仅在vertex生效的glsl方法
+	 */
+	public static var vertexglslFuncs:Array<String>;
+
+	/**
 	 * glsl通用变量定义
 	 */
 	public static var vars:Map<String, String>;
@@ -109,6 +114,7 @@ class GLSLCompileMacro {
 		vdefines = [];
 		fdefines = [];
 		glslFuncs = [];
+		vertexglslFuncs = [];
 		vars = [];
 		maps = [];
 		arrayUid = 0;
@@ -160,6 +166,9 @@ class GLSLCompileMacro {
 			vertex += maps.get(value);
 			fragment += maps.get(value);
 		}
+		for (index => value in vertexglslFuncs) {
+			vertex += maps.get(value);
+		}
 		fragment += maps.get("fragment");
 		vertex += maps.get("vertex");
 
@@ -170,8 +179,8 @@ class GLSLCompileMacro {
 		}
 
 		// #pragma body
-		fragment = StringTools.replace(fragment,"super.fragment();", "#pragma body");
-		vertex = StringTools.replace(vertex,"super.vertex();", "#pragma body");
+		fragment = StringTools.replace(fragment, "super.fragment();", "#pragma body");
+		vertex = StringTools.replace(vertex, "super.vertex();", "#pragma body");
 
 		// 格式化
 		fragment = GLSLFormat.format(fragment);
@@ -212,6 +221,8 @@ class GLSLCompileMacro {
 				});
 			}
 			var newField = null;
+			if (isDebug)
+				trace("fields.length=", fields.length);
 			for (f in fields) {
 				if (f.name == "new") {
 					newField = f;
@@ -257,6 +268,8 @@ class GLSLCompileMacro {
 				});
 			}
 		}
+		if (isDebug)
+			trace("编译结束");
 		return fields;
 	}
 
@@ -333,12 +346,15 @@ class GLSLCompileMacro {
 				}
 			case "FFun":
 				// 方法解析
-				var isGLSLFunc = field.meta.filter((f) -> f.name == ":glsl").length != 0;
+				var isVertexGLSLVar = field.meta.filter((f) -> f.name == ":vertexglsl").length != 0;
+				var isGLSLFunc = isVertexGLSLVar || field.meta.filter((f) -> f.name == ":glsl").length != 0;
 				if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
 					return;
 				if (!hasVertexFragment || (field.name == "vertex" && field.name == "fragment"))
 					return;
-				if (isGLSLFunc) {
+				if (isVertexGLSLVar) {
+					vertexglslFuncs.push(field.name);
+				} else if (isGLSLFunc) {
 					glslFuncs.push(field.name);
 				}
 				maps.set(field.name, "");
@@ -625,10 +641,9 @@ class GLSLCompileMacro {
 				if (elsecontent != null) {
 					content = toExprValue(elsecontent.expr);
 					existEnd = content.lastIndexOf(";\n") == content.length - 2 || content.lastIndexOf("}\n") == content.length - 2;
-					if(content.indexOf("if") != -1){
+					if (content.indexOf("if") != -1) {
 						data += "else {\n" + content + "\n}";
-					}
-					else
+					} else
 						data += "else{\n" + content + (existEnd ? "\n}" : ";\n}");
 				}
 				return data;
