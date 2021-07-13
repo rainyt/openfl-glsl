@@ -124,13 +124,14 @@ class GLSLCompileMacro {
 		attribute = [];
 
 		parserGLSL(fields);
-		if (platform == "glsl") {
-			var localClass = Context.getLocalClass().get();
-			var superClass = localClass.superClass != null ? localClass.superClass.t.get() : null;
-			var parent = superClass;
-			if (parent != null)
-				parserGLSL(parent.fields.get(), false);
-		}
+		// if (platform == "glsl") {
+		// 允许继承父节点的着色器对象
+		var localClass = Context.getLocalClass().get();
+		var superClass = localClass.superClass != null ? localClass.superClass.t.get() : null;
+		var parent = superClass;
+		if (parent != null)
+			parserGLSL(parent.fields.get(), false);
+		// }
 
 		// 创建new
 		var vertex = platform == "glsl" ? "" : "#pragma header\n";
