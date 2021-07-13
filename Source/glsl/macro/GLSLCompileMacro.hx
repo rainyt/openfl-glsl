@@ -123,7 +123,6 @@ class GLSLCompileMacro {
 		varying = [];
 		attribute = [];
 
-		parserGLSL(fields);
 		// if (platform == "glsl") {
 		// 允许继承父节点的着色器对象
 		var localClass = Context.getLocalClass().get();
@@ -132,6 +131,7 @@ class GLSLCompileMacro {
 		if (parent != null)
 			parserGLSL(parent.fields.get(), false);
 		// }
+		parserGLSL(fields);
 
 		// 创建new
 		var vertex = platform == "glsl" ? "" : "#pragma header\n";
