@@ -120,6 +120,7 @@ class GLSLCompileMacro {
 		fdefines = [];
 		glslFuncs = [];
 		vertexglslFuncs = [];
+		fragmentFuncs = [];
 		vars = [];
 		maps = [];
 		arrayUid = 0;
