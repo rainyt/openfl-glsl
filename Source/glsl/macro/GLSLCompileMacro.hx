@@ -63,6 +63,11 @@ class GLSLCompileMacro {
 	public static var vertexglslFuncs:Array<String>;
 
 	/**
+	 * 仅在fragment生效的glsl方法
+	 */
+	public static var fragmentFuncs:Array<String>;
+
+	/**
 	 * glsl通用变量定义
 	 */
 	public static var vars:Map<String, String>;
@@ -169,6 +174,9 @@ class GLSLCompileMacro {
 		}
 		for (index => value in vertexglslFuncs) {
 			vertex += maps.get(value);
+		}
+		for (index => value in fragmentFuncs) {
+			fragment += maps.get(value);
 		}
 		fragment += maps.get("fragment");
 		vertex += maps.get("vertex");
@@ -347,13 +355,16 @@ class GLSLCompileMacro {
 				}
 			case "FFun":
 				// 方法解析
+				var isFragmentGLSLVar = field.meta.filter((f) -> f.name == ":fragmentglsl").length != 0;
 				var isVertexGLSLVar = field.meta.filter((f) -> f.name == ":vertexglsl").length != 0;
-				var isGLSLFunc = isVertexGLSLVar || field.meta.filter((f) -> f.name == ":glsl").length != 0;
+				var isGLSLFunc = isFragmentGLSLVar || isVertexGLSLVar || field.meta.filter((f) -> f.name == ":glsl").length != 0;
 				if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
 					return;
 				if (!hasVertexFragment || (field.name == "vertex" && field.name == "fragment"))
 					return;
-				if (isVertexGLSLVar) {
+				if (isFragmentGLSLVar) {
+					fragmentFuncs.push(field.name);
+				} else if (isVertexGLSLVar) {
 					vertexglslFuncs.push(field.name);
 				} else if (isGLSLFunc) {
 					glslFuncs.push(field.name);
