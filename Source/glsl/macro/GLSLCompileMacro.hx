@@ -94,6 +94,16 @@ class GLSLCompileMacro {
 	public static var isDebug:Bool;
 
 	/**
+	 * 顶点着色器的头部属性是否仍然包含
+	 */
+	public static var vnoheader:Bool = false;
+
+	/**
+	 * 像素着色器的头部属性是否仍然包含
+	 */
+	public static var fnoheader:Bool = false;
+
+	/**
 	 * 是否输出，需要输出时，需要使用`-D output=./bin`定义输出目录
 	 */
 	public static var output:String;
@@ -140,8 +150,8 @@ class GLSLCompileMacro {
 		parserGLSL(fields);
 
 		// 创建new
-		var vertex = platform == "glsl" ? "" : "#pragma header\n";
-		var fragment = platform == "glsl" ? "" : "#pragma header\n";
+		var vertex = (vnoheader || platform == "glsl") ? "" : "#pragma header\n";
+		var fragment = (fnoheader || platform == "glsl") ? "" : "#pragma header\n";
 		for (d in fdefines) {
 			fragment += d;
 		}
@@ -375,6 +385,13 @@ class GLSLCompileMacro {
 				for (index => value in field.meta) {
 					var line = null;
 					switch (value.name) {
+						case ":noheader":
+							// 不包含头部
+							if (field.name == "vertex") {
+								vnoheader = true;
+							} else if (field.name == "fragment") {
+								fnoheader = true;
+							}
 						case ":precision":
 							var expr:ExprDef = value.params[0].expr.getParameters()[0];
 							line = "precision " + expr.getParameters()[0] + ";\n";
