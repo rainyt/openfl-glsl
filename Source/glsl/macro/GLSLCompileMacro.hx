@@ -150,8 +150,10 @@ class GLSLCompileMacro {
 		parserGLSL(fields);
 
 		// 创建new
-		var vertex = (vnoheader || platform == "glsl") ? "" : "#pragma header\n";
-		var fragment = (fnoheader || platform == "glsl") ? "" : "#pragma header\n";
+		// var vertex = (vnoheader || platform == "glsl") ? "" : "#pragma header\n";
+		// var fragment = (fnoheader || platform == "glsl") ? "" : "#pragma header\n";
+		var vertex = (platform == "glsl") ? "" : "#pragma header\n";
+		var fragment = (platform == "glsl") ? "" : "#pragma header\n";
 		for (d in fdefines) {
 			fragment += d;
 		}
@@ -166,7 +168,8 @@ class GLSLCompileMacro {
 		// uniform定义
 		for (key => value in uniform) {
 			vertex += value;
-			fragment += value;
+			if(value.indexOf("mat") == -1)
+				fragment += value;
 		}
 		// varying定义
 		for (key => value in varying) {
@@ -386,7 +389,7 @@ class GLSLCompileMacro {
 					var line = null;
 					switch (value.name) {
 						case ":noheader":
-							// 不包含头部
+							// 不包含头部，未完成
 							if (field.name == "vertex") {
 								vnoheader = true;
 							} else if (field.name == "fragment") {
