@@ -168,7 +168,7 @@ class GLSLCompileMacro {
 		// uniform定义
 		for (key => value in uniform) {
 			vertex += value;
-			if(value.indexOf("mat") == -1)
+			if (value.indexOf("mat") == -1)
 				fragment += value;
 		}
 		// varying定义
@@ -331,6 +331,11 @@ class GLSLCompileMacro {
 	public static function parserGLSLField(field:Field, hasVertexFragment:Bool = true):Void {
 		switch (field.kind.getName()) {
 			case "FVar":
+				// arrayLen支持，可定义数组的长度
+				var arrayLen = 0;
+				var isVarArrayLen = field.meta.filter(f -> f.name == ":arrayLen").length > 0;
+				if (isVarArrayLen)
+					arrayLen = Std.parseInt(toExprValue(field.meta.filter(f -> f.name == ":arrayLen")[0].params[0].expr));
 				var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
 				var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
 				var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
@@ -351,7 +356,7 @@ class GLSLCompileMacro {
 						+ c
 						+ (platform != "openfl" ? " " : (isUniform ? " u_" : isAttribute ? " a_" : " "))
 						+ field.name
-						+ (isArray ? "$[" + arrayUid + "]" : ""));
+						+ (isArray ? (isVarArrayLen ? "[" + arrayLen + "]" : "$[" + arrayUid + "]") : ""));
 					if (value != null) {
 						varmap.set(field.name, varmap.get(field.name) + "=" + toExprValue(value.expr));
 					}

@@ -127,6 +127,13 @@ class Shader extends glsl.OpenFLShader {
 }
 ```
 
+## @:arrayLen
+新增指定数组长度支持：
+```haxe
+@:arrayLen(42)
+@:uniform public var array:Array<Mat4>;
+```
+
 ## @:define
 在指定的`fragment()`或者`vertex()`方法中，新增`@:define`可以对该着色器添加宏定义，他们之间定义的宏不会互相定义。
 In the specified `fragment()` or `vertex()` method, the new `@:define` can add macro definitions to the shader, and the macros defined between them will not define each other.

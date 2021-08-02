@@ -1,6 +1,7 @@
 ## 0.1.1
 - 改进：支持`GLSLCompileMacro`能够让子类继承父类的方法、属性等。
-- 改进：新增`:fragmentglsl`元数据支持，仅在fragment着色器中生效的方法。
+- 新增：新增`@:fragmentglsl`元数据支持，仅在fragment着色器中生效的方法。
+- 新增：新增`@:arrayLen`指定数组长度支持。
 
 ## 0.1.0
 - 修复：修复`if else`解析错误问题。
