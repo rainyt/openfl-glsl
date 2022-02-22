@@ -63,11 +63,6 @@ class GLSLCompileMacro {
 	public static var vertexglslFuncs:Array<String>;
 
 	/**
-	 * 仅在fragment生效的glsl方法
-	 */
-	public static var fragmentFuncs:Array<String>;
-
-	/**
 	 * glsl通用变量定义
 	 */
 	public static var vars:Map<String, String>;
@@ -92,16 +87,6 @@ class GLSLCompileMacro {
 	public static var fields:Array<Field>;
 
 	public static var isDebug:Bool;
-
-	/**
-	 * 顶点着色器的头部属性是否仍然包含
-	 */
-	public static var vnoheader:Bool = false;
-
-	/**
-	 * 像素着色器的头部属性是否仍然包含
-	 */
-	public static var fnoheader:Bool = false;
 
 	/**
 	 * 是否输出，需要输出时，需要使用`-D output=./bin`定义输出目录
@@ -130,7 +115,6 @@ class GLSLCompileMacro {
 		fdefines = [];
 		glslFuncs = [];
 		vertexglslFuncs = [];
-		fragmentFuncs = [];
 		vars = [];
 		maps = [];
 		arrayUid = 0;
@@ -150,10 +134,8 @@ class GLSLCompileMacro {
 		parserGLSL(fields);
 
 		// 创建new
-		// var vertex = (vnoheader || platform == "glsl") ? "" : "#pragma header\n";
-		// var fragment = (fnoheader || platform == "glsl") ? "" : "#pragma header\n";
-		var vertex = (platform == "glsl") ? "" : "#pragma header\n";
-		var fragment = (platform == "glsl") ? "" : "#pragma header\n";
+		var vertex = platform == "glsl" ? "" : "#pragma header\n";
+		var fragment = platform == "glsl" ? "" : "#pragma header\n";
 		for (d in fdefines) {
 			fragment += d;
 		}
@@ -167,9 +149,8 @@ class GLSLCompileMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
-			vertex += value;
-			if (value.indexOf("mat") == -1)
-				fragment += value;
+			// vertex += value;
+			fragment += value;
 		}
 		// varying定义
 		for (key => value in varying) {
@@ -188,9 +169,6 @@ class GLSLCompileMacro {
 		}
 		for (index => value in vertexglslFuncs) {
 			vertex += maps.get(value);
-		}
-		for (index => value in fragmentFuncs) {
-			fragment += maps.get(value);
 		}
 		fragment += maps.get("fragment");
 		vertex += maps.get("vertex");
@@ -331,11 +309,6 @@ class GLSLCompileMacro {
 	public static function parserGLSLField(field:Field, hasVertexFragment:Bool = true):Void {
 		switch (field.kind.getName()) {
 			case "FVar":
-				// arrayLen支持，可定义数组的长度
-				var arrayLen = 0;
-				var isVarArrayLen = field.meta.filter(f -> f.name == ":arrayLen").length > 0;
-				if (isVarArrayLen)
-					arrayLen = Std.parseInt(toExprValue(field.meta.filter(f -> f.name == ":arrayLen")[0].params[0].expr));
 				var isGLSLVar = field.meta.filter((f) -> f.name == ":glsl").length != 0;
 				var isUniform = field.meta.filter(f -> f.name == ":uniform").length > 0;
 				var isVarying = field.meta.filter(f -> f.name == ":varying").length > 0;
@@ -356,7 +329,7 @@ class GLSLCompileMacro {
 						+ c
 						+ (platform != "openfl" ? " " : (isUniform ? " u_" : isAttribute ? " a_" : " "))
 						+ field.name
-						+ (isArray ? (isVarArrayLen ? "[" + arrayLen + "]" : "$[" + arrayUid + "]") : ""));
+						+ (isArray ? "$[" + arrayUid + "]" : ""));
 					if (value != null) {
 						varmap.set(field.name, varmap.get(field.name) + "=" + toExprValue(value.expr));
 					}
@@ -374,16 +347,13 @@ class GLSLCompileMacro {
 				}
 			case "FFun":
 				// 方法解析
-				var isFragmentGLSLVar = field.meta.filter((f) -> f.name == ":fragmentglsl").length != 0;
 				var isVertexGLSLVar = field.meta.filter((f) -> f.name == ":vertexglsl").length != 0;
-				var isGLSLFunc = isFragmentGLSLVar || isVertexGLSLVar || field.meta.filter((f) -> f.name == ":glsl").length != 0;
+				var isGLSLFunc = isVertexGLSLVar || field.meta.filter((f) -> f.name == ":glsl").length != 0;
 				if (field.name != "vertex" && field.name != "fragment" && !isGLSLFunc)
 					return;
 				if (!hasVertexFragment || (field.name == "vertex" && field.name == "fragment"))
 					return;
-				if (isFragmentGLSLVar) {
-					fragmentFuncs.push(field.name);
-				} else if (isVertexGLSLVar) {
+				if (isVertexGLSLVar) {
 					vertexglslFuncs.push(field.name);
 				} else if (isGLSLFunc) {
 					glslFuncs.push(field.name);
@@ -393,13 +363,6 @@ class GLSLCompileMacro {
 				for (index => value in field.meta) {
 					var line = null;
 					switch (value.name) {
-						case ":noheader":
-							// 不包含头部，未完成
-							if (field.name == "vertex") {
-								vnoheader = true;
-							} else if (field.name == "fragment") {
-								fnoheader = true;
-							}
 						case ":precision":
 							var expr:ExprDef = value.params[0].expr.getParameters()[0];
 							line = "precision " + expr.getParameters()[0] + ";\n";

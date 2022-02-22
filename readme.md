@@ -86,9 +86,6 @@ Reference examples:
 ## @:vertexglsl
 当只想给vertex顶点着色器添加方法时，则使用`@:vertexglsl`，而不需要`@:glsl`。
 
-## @:fragmentglsl
-当只想给fragment着色器添加方法时，则使用`@:fragmentglsl`，而不需要`@:glsl`。
-
 ## @:attribute
 在类中添加`@:attribute`变量，可创建出attribute变量：
 ```haxe
@@ -125,13 +122,6 @@ class Shader extends glsl.OpenFLShader {
 		gl_FragColor = vec4(textureCoords, 0, 1);
 	}
 }
-```
-
-## @:arrayLen
-新增指定数组长度支持：
-```haxe
-@:arrayLen(42)
-@:uniform public var array:Array<Mat4>;
 ```
 
 ## @:define
