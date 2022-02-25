@@ -149,7 +149,8 @@ class GLSLCompileMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
-			// vertex += value;
+			if (value.indexOf("sampler") == -1)
+				vertex += value;
 			fragment += value;
 		}
 		// varying定义
