@@ -167,12 +167,16 @@ class GLSLCompileMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
-			// if (value.indexOf("sampler") == -1)
-			if (vertexglslFuncs.length > 0)
+			if (value.indexOf("sampler") == -1)
 				vertex += value;
-			else {
+			if (value.indexOf("mat") == -1)
 				fragment += value;
-			}
+			// if (value.indexOf("sampler") == -1)
+			// if (vertexglslFuncs.length > 0)
+			// 	vertex += value;
+			// else {
+			// 	fragment += value;
+			// }
 			// if (value.indexOf("mat") == -1)
 			// fragment += value;
 		}
