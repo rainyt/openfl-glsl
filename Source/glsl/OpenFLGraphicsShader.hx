@@ -14,6 +14,16 @@ class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.c
 	public var gl_openfl_TextureCoordv:Vec2;
 
 	/**
+	 * 位图
+	 */
+	public var gl_bitmap:Sampler2D;
+
+	/**
+	 * 纹理UV
+	 */
+	public var gl_openfl_TextureCoord:Vec2;
+
+	/**
 	 * 颜色偏移
 	 */
 	public var gl_openfl_ColorOffsetv:Vec4;
@@ -32,11 +42,6 @@ class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.c
 	 * 纹理尺寸
 	 */
 	public var gl_openfl_TextureSize:Vec2;
-
-	/**
-	 * 纹理对象
-	 */
-	public var gl_bitmap:Sampler2D;
 
 	/**
 	 * 当前纹理透明度

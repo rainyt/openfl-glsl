@@ -167,10 +167,15 @@ class GLSLCompileMacro {
 		}
 		// uniform定义
 		for (key => value in uniform) {
-			if (value.indexOf("sampler") == -1)
+			if (maps.exists("vertex")) {
 				vertex += value;
-			if (value.indexOf("mat") == -1)
+			} else {
 				fragment += value;
+			}
+			// if (value.indexOf("sampler") == -1)
+			// 	vertex += value;
+			// if (value.indexOf("mat") == -1)
+			// 	fragment += value;
 			// if (value.indexOf("sampler") == -1)
 			// if (vertexglslFuncs.length > 0)
 			// 	vertex += value;
@@ -270,7 +275,7 @@ class GLSLCompileMacro {
 					access: [APublic],
 					kind: FFun({
 						args: [],
-						ret: macro:Void,
+						ret: macro :Void,
 						expr: macro {super();}
 					}),
 					pos: pos
@@ -285,7 +290,7 @@ class GLSLCompileMacro {
 					doc: null,
 					meta: [],
 					access: [APublic, AStatic],
-					kind: FVar(macro:String, macro $v{fragment}),
+					kind: FVar(macro :String, macro $v{fragment}),
 					pos: pos
 				});
 			}
@@ -295,7 +300,7 @@ class GLSLCompileMacro {
 					doc: null,
 					meta: [],
 					access: [APublic, AStatic],
-					kind: FVar(macro:String, macro $v{vertex}),
+					kind: FVar(macro :String, macro $v{vertex}),
 					pos: pos
 				});
 			}
@@ -421,7 +426,7 @@ class GLSLCompileMacro {
 								doc: null,
 								meta: [],
 								access: [APublic],
-								kind: FVar(macro:Dynamic),
+								kind: FVar(macro :Dynamic),
 								pos: Context.currentPos()
 							};
 							fields.push(newDefineField);
