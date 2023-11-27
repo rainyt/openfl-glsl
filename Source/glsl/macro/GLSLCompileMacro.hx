@@ -165,13 +165,34 @@ class GLSLCompileMacro {
 		for (key => value in attribute) {
 			vertex += value;
 		}
+		var vertexContent = "";
+		var fragmentContent = "";
+		for (index => value in vertexglslFuncs) {
+			vertexContent += maps.get(value);
+		}
+		for (index => value in fragmentFuncs) {
+			fragmentContent += maps.get(value);
+		}
+		vertexContent += maps.get("vertex");
+		fragmentContent += maps.get("fragment");
 		// uniform定义
 		for (key => value in uniform) {
-			if (maps.exists("vertex")) {
-				vertex += value;
+			if (value.indexOf("sampler") != -1) {
+				trace("vertexContent=", key, vertexContent, vertexContent.indexOf(key));
+				if (vertexContent.indexOf(key) != -1) {
+					vertex += value;
+					continue;
+				}
 			} else {
-				fragment += value;
+				vertex += value;
 			}
+			if (value.indexOf("mat") == -1)
+				fragment += value;
+			// if (maps.exists("vertex")) {
+			// 	vertex += value;
+			// } else {
+			// 	fragment += value;
+			// }
 			// if (value.indexOf("sampler") == -1)
 			// 	vertex += value;
 			// if (value.indexOf("mat") == -1)
@@ -200,14 +221,16 @@ class GLSLCompileMacro {
 			vertex += maps.get(value);
 			fragment += maps.get(value);
 		}
-		for (index => value in vertexglslFuncs) {
-			vertex += maps.get(value);
-		}
-		for (index => value in fragmentFuncs) {
-			fragment += maps.get(value);
-		}
-		fragment += maps.get("fragment");
-		vertex += maps.get("vertex");
+		vertex += vertexContent;
+		fragment += fragmentContent;
+		// for (index => value in vertexglslFuncs) {
+		// 	vertex += maps.get(value);
+		// }
+		// for (index => value in fragmentFuncs) {
+		// 	fragment += maps.get(value);
+		// }
+		// fragment += maps.get("fragment");
+		// vertex += maps.get("vertex");
 
 		// 数组长度转义
 		for (key => value in arrayUidByName) {
