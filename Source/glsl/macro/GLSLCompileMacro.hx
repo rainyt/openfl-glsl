@@ -178,7 +178,6 @@ class GLSLCompileMacro {
 		// uniform定义
 		for (key => value in uniform) {
 			if (value.indexOf("sampler") != -1) {
-				trace("vertexContent=", key, vertexContent, vertexContent.indexOf(key));
 				if (vertexContent.indexOf(key) != -1) {
 					vertex += value;
 					continue;
