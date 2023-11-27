@@ -108,7 +108,7 @@ class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core
 		if (__intervalId != -1)
 			openfl.Lib.clearInterval(__intervalId);
 		if (bool)
-			__intervalId = openfl.Lib.setInterval(onFrame, 0);
+			__intervalId = openfl.Lib.setInterval(onFrame, Std.int(1000/60));
 		#end
 	}
 
