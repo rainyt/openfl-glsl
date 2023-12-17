@@ -10,6 +10,11 @@ class GLSLParser {
 	public var fields:Array<GLSLField> = [];
 
 	/**
+	 * 所有定义，可通过名字访问
+	 */
+	public var fieldsMap:Map<String, GLSLField> = [];
+
+	/**
 	 * uniform定义
 	 */
 	public var uniforms:Array<GLSLField> = [];
@@ -41,8 +46,15 @@ class GLSLParser {
 					// 参数定义 @:uniform @:varying @:attribute
 					this.pushField(item);
 				case FFun(f):
+				case FProp(get, set, t, e):
+					// 不支持
+			}
+		}
+		for (item in list) {
+			switch item.kind {
+				case FVar(t, e):
+				case FFun(f):
 					// 方法定义 @:fragmentglsl @:vertexglsl
-					// 默认方法名 vertex fragment
 					this.pushMethod(item);
 				case FProp(get, set, t, e):
 					// 不支持
@@ -76,16 +88,18 @@ class GLSLParser {
 						NONE;
 				};
 				if (fieldType != NONE) {
+					var f = new GLSLField(fieldType, field);
 					switch fieldType {
 						case UNIFORM:
-							uniforms.push(new GLSLField(fieldType, field));
+							uniforms.push(f);
 						case VARYING:
-							uniforms.push(new GLSLField(fieldType, field));
+							uniforms.push(f);
 						case ATTRIBUTE:
-							uniforms.push(new GLSLField(fieldType, field));
+							uniforms.push(f);
 						case NONE:
 					}
-					fields.push(new GLSLField(fieldType, field));
+					fields.push(f);
+					fieldsMap.set(f.name, f);
 				}
 			default:
 		}
@@ -97,24 +111,25 @@ class GLSLParser {
 			case FFun(f):
 				var metas = field.meta.map(f -> f.name);
 				if (field.name == "vertex" || field.name == "fragment") {
-					glsls.push(new GLSLCode(field.name, field));
+					glsls.push(new GLSLCode(field.name, field, this));
 				}
 			case FProp(get, set, t, e):
 		}
 	}
 
 	/**
-	 * 
+	 * 获得vertex已编译好的代码
 	 */
 	public function getVertexGLSLCode():String {
-		return glslsMap.get("vertex").glslCode;
+		return "void main(void)" + glslsMap.get("vertex").glslCode;
 	}
 
 	/**
+	 * 获得Framgemnt已编译好的代码
 	 * @return String
 	 */
 	public function getFragmentGLSLCode():String {
-		return glslsMap.get("fragment").glslCode;
+		return "void main(void)" + glslsMap.get("fragment").glslCode;
 	}
 }
 #end

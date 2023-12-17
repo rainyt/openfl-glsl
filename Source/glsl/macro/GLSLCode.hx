@@ -19,12 +19,20 @@ class GLSLCode {
 	public var defines:Array<GLSLDefine> = [];
 
 	/**
+	 * 已使用的变量定义
+	 */
+	public var useVars:Map<String, GLSLField> = [];
+
+	/**
 	 * 方法名
 	 */
 	public var name:String;
 
-	public function new(methodName:String, field:Field) {
+	private var __parser:GLSLParser;
+
+	public function new(methodName:String, field:Field, parser:GLSLParser) {
 		this.name = methodName;
+		this.__parser = parser;
 		switch field.kind {
 			case FFun(f):
 				for (item in field.meta.iterator()) {
@@ -117,6 +125,10 @@ class GLSLCode {
 				if (objectKey == "this") {
 					return field;
 				} else {
+					var glslField = __parser.fieldsMap.get(objectKey);
+					if (glslField != null) {
+						return '${glslField.fieldName}.$field';
+					}
 					return '$objectKey.$field';
 				}
 			case EParenthesis(e):
@@ -215,7 +227,7 @@ class GLSLCode {
 			case ECall(e, params):
 				var funName = ExprTools.toString(e);
 				switch (funName) {
-					case "vec2", "vec2", "vec3", "vec4":
+					case "vec2", "vec3", "vec4":
 						return funName;
 				}
 			// case EArray(e1, e2):

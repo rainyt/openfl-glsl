@@ -11,14 +11,19 @@ class GLSLField {
 	private var __field:Field;
 
 	/**
+	 * 原变量名
+	 */
+	public var name:String;
+
+	/**
 	 * GLSL变量定义名
 	 */
-	private var fieldName:String;
+	public var fieldName:String;
 
 	/**
 	 * GLSL变量定义类型
 	 */
-	private var fieldType:String;
+	public var fieldType:String;
 
 	/**
 	 * GLSL变量定义类型
@@ -29,6 +34,7 @@ class GLSLField {
 		__field = field;
 		this.glslFieldType = type;
 		fieldName = field.name;
+		name = field.name;
 		switch glslFieldType {
 			case UNIFORM:
 				fieldName = "u_" + fieldName;
