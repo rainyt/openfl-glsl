@@ -1,3 +1,7 @@
 --class-path Source
 --library openfl
 --library vector-math
+--class-path Test
+--main GLSLMain
+--js bin/main.js
+--no-output

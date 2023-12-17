@@ -62,7 +62,6 @@ class GLSLParser {
 		for (item in parentFields) {
 			switch item.kind {
 				case FVar(read, write):
-					trace("这是个变量", item.name);
 					var type = TypeTools.toComplexType(item.type);
 					parentFieldList.push({
 						name: item.name,
