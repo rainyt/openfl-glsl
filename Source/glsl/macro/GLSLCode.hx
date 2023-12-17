@@ -11,7 +11,7 @@ class GLSLCode {
 	/**
 	 * 已编译的GLSL代码
 	 */
-	public var glslCode:String;
+	private var glslCode:String;
 
 	/**
 	 * GLSL中定义的参数
@@ -274,6 +274,14 @@ class GLSLCode {
 				throw "Don't support " + expr.expr.getName() + " type";
 		}
 		return "???";
+	}
+
+	public function getGLSLCode():String {
+		var code = [];
+		for (field in this.useVars) {
+			code.push(field.getGLSLCode());
+		}
+		return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
 	}
 }
 #end

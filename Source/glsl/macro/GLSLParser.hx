@@ -179,7 +179,8 @@ class GLSLParser {
 	 * 获得vertex已编译好的代码
 	 */
 	public function getVertexGLSLCode():String {
-		return "void main(void)" + glslsMap.get("vertex").glslCode;
+		var code = glslsMap.get("vertex");
+		return code.getGLSLCode();
 	}
 
 	/**
@@ -187,7 +188,8 @@ class GLSLParser {
 	 * @return String
 	 */
 	public function getFragmentGLSLCode():String {
-		return "void main(void)" + glslsMap.get("fragment").glslCode;
+		var code = glslsMap.get("fragment");
+		return code.getGLSLCode();
 	}
 }
 #end

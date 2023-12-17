@@ -54,7 +54,16 @@ class GLSLField {
 	}
 
 	public function getGLSLCode():String {
-		return fieldType.toLowerCase() + " " + fieldName + ";";
+		switch this.glslFieldType {
+			case UNIFORM:
+				return "uniform " + fieldType.toLowerCase() + " " + fieldName + ";";
+			case VARYING:
+				return "varying " + fieldType.toLowerCase() + " " + fieldName + ";";
+			case ATTRIBUTE:
+				return "attribute " + fieldType.toLowerCase() + " " + fieldName + ";";
+			case NONE:
+				return fieldType.toLowerCase() + " " + fieldName + ";";
+		}
 	}
 }
 #end
