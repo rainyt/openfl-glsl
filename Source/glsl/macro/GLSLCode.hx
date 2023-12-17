@@ -50,6 +50,14 @@ class GLSLCode {
 		}
 	}
 
+	private function __getGLSLField(key:String):GLSLField {
+		var f = __parser.getGLSLField(key);
+		if (f != null) {
+			this.useVars.set(f.name, f);
+		}
+		return f;
+	}
+
 	public function parserCodeExpr(expr:Expr, ?custom:Dynamic):String {
 		if (expr == null)
 			return null;
@@ -60,6 +68,11 @@ class GLSLCode {
 						switch (custom) {
 							case "vec2", "vec3", "vec4", "float":
 								return v + ".";
+						}
+					case CIdent(s):
+						var field = __getGLSLField(s);
+						if (field != null) {
+							return field.fieldName;
 						}
 					default:
 				}
@@ -125,7 +138,7 @@ class GLSLCode {
 				if (objectKey == "this") {
 					return field;
 				} else {
-					var glslField = __parser.fieldsMap.get(objectKey);
+					var glslField = __getGLSLField(objectKey);
 					if (glslField != null) {
 						return '${glslField.fieldName}.$field';
 					}

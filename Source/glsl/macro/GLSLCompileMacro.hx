@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import haxe.macro.TypeTools;
 import haxe.macro.Context;
 import haxe.macro.Expr.Field;
 
@@ -17,8 +18,10 @@ class GLSLCompileMacro {
 	 * @return Array<Field>
 	 */
 	public static function build(mode:String):Array<Field> {
+		
+
 		var list = Context.getBuildFields();
-		var glslFields = new GLSLParser(list);
+		var glslFields = new GLSLParser(Context.getLocalClass(), list);
 		var vertex = glslFields.getVertexGLSLCode();
 		var fragment = glslFields.getFragmentGLSLCode();
 		trace("vertex=", vertex);

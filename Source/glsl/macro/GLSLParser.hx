@@ -1,5 +1,8 @@
 package glsl.macro;
 
+import haxe.macro.TypeTools;
+import haxe.macro.Type.Ref;
+import haxe.macro.Type.ClassType;
 import haxe.macro.Expr.Field;
 
 #if macro
@@ -39,7 +42,46 @@ class GLSLParser {
 	 */
 	public var glslsMap:Map<String, GLSLCode> = [];
 
-	public function new(list:Array<Field>) {
+	/**
+	 * 父节点的解析
+	 */
+	public var parentParser:GLSLParser;
+
+	/**
+	 * 解析父节点的内容
+	 * @param c 
+	 */
+	private function parserParentClass(c:Null<Ref<haxe.macro.ClassType>>):Void {
+		// 父节点GLSL定义
+		var parent = c.get().superClass;
+		if (parent == null) {
+			return;
+		}
+		var parentFields = parent.t.get().fields.get();
+		var parentFieldList:Array<Field> = [];
+		for (item in parentFields) {
+			switch item.kind {
+				case FVar(read, write):
+					trace("这是个变量", item.name);
+					var type = TypeTools.toComplexType(item.type);
+					parentFieldList.push({
+						name: item.name,
+						meta: item.meta.get(),
+						doc: null,
+						access: [APublic],
+						kind: FVar(type),
+						pos: item.pos
+					});
+				case FMethod(k):
+					trace("这是个方法！");
+			}
+		}
+		parentParser = new GLSLParser(parent.t, parentFieldList);
+	}
+
+	public function new(c:Null<Ref<haxe.macro.ClassType>>, list:Array<Field>) {
+		// 解析父节点
+		this.parserParentClass(c);
 		for (item in list) {
 			switch item.kind {
 				case FVar(t, e):
@@ -89,20 +131,37 @@ class GLSLParser {
 				};
 				if (fieldType != NONE) {
 					var f = new GLSLField(fieldType, field);
-					switch fieldType {
-						case UNIFORM:
-							uniforms.push(f);
-						case VARYING:
-							uniforms.push(f);
-						case ATTRIBUTE:
-							uniforms.push(f);
-						case NONE:
-					}
-					fields.push(f);
-					fieldsMap.set(f.name, f);
+					pushGLSLField(f);
 				}
 			default:
 		}
+	}
+
+	/**
+	 * 追加GLSL的定义
+	 * @param f 
+	 */
+	public function pushGLSLField(f:GLSLField):Void {
+		switch f.glslFieldType {
+			case UNIFORM:
+				uniforms.push(f);
+			case VARYING:
+				uniforms.push(f);
+			case ATTRIBUTE:
+				uniforms.push(f);
+			case NONE:
+		}
+		fields.push(f);
+		fieldsMap.set(f.name, f);
+	}
+
+	public function getGLSLField(name:String):GLSLField {
+		if (this.fieldsMap.exists(name))
+			return this.fieldsMap.get(name);
+		if (parentParser != null) {
+			return parentParser.getGLSLField(name);
+		} else
+			return null;
 	}
 
 	public function pushMethod(field:Field):Void {
