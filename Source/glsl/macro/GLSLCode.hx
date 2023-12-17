@@ -58,6 +58,13 @@ class GLSLCode {
 		return f;
 	}
 
+	private function __formatField(field:String):String {
+		if (field.indexOf("gl_openfl_") == 0) {
+			return StringTools.replace(field, "gl_openfl_", "openfl_");
+		}
+		return field;
+	}
+
 	public function parserCodeExpr(expr:Expr, ?custom:Dynamic):String {
 		if (expr == null)
 			return null;
@@ -73,6 +80,8 @@ class GLSLCode {
 						var field = __getGLSLField(s);
 						if (field != null) {
 							return field.fieldName;
+						} else {
+							return __formatField(s);
 						}
 					default:
 				}
@@ -134,16 +143,16 @@ class GLSLCode {
 					case OpNullCoal:
 				}
 			case EField(e, field, kind):
-				var objectKey = ExprTools.toString(e);
+				var objectKey = parserCodeExpr(e);
 				if (objectKey == "super") {
 					// TODO 父方法，这里需要将父节点的代码合并进来
 					// return field;
 				} else if (objectKey == "this") {
-					return field;
+					return __formatField(field);
 				} else {
 					var glslField = __getGLSLField(objectKey);
 					if (glslField != null) {
-						return '${glslField.fieldName}.$field';
+						return '${glslField.fieldName}.${__formatField(field)}';
 					}
 					return '$objectKey.$field';
 				}

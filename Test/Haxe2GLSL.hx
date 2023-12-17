@@ -9,6 +9,7 @@ function float(a:Dynamic):Dynamic {
 /**
  * 使用Haxe转换为GLSL，通过fragmentSource和vertexSource进行访问
  */
+@:debug
 class Haxe2GLSL extends BaseGLSL {
 	@:attribute public var a:Vec2;
 
@@ -37,7 +38,7 @@ class Haxe2GLSL extends BaseGLSL {
 		var w2 = 1;
 		// Float
 		var w3 = 1.;
-		w3 += abc + a.x + time;
+		w3 += abc + this.a.x + time;
 	}
 
 	public function vertex():Void {
