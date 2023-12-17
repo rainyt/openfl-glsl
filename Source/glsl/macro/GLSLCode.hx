@@ -135,7 +135,10 @@ class GLSLCode {
 				}
 			case EField(e, field, kind):
 				var objectKey = ExprTools.toString(e);
-				if (objectKey == "this") {
+				if (objectKey == "super") {
+					// TODO 父方法，这里需要将父节点的代码合并进来
+					// return field;
+				} else if (objectKey == "this") {
 					return field;
 				} else {
 					var glslField = __getGLSLField(objectKey);

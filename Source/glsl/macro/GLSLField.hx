@@ -47,7 +47,10 @@ class GLSLField {
 			case FVar(t, e):
 				// TODO e参数可以作为默认值实现，待支持
 				var typeName = ComplexTypeTools.toString(t);
-				fieldType = typeName;
+				if (typeName == "StdTypes.Float") {
+					fieldType = "float";
+				} else
+					fieldType = typeName;
 			default:
 				throw "Don't support FFun FProp";
 		}

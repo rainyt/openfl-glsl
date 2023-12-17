@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import haxe.macro.TypedExprTools;
 import haxe.macro.TypeTools;
 import haxe.macro.Type.Ref;
 import haxe.macro.Type.ClassType;
@@ -72,7 +73,8 @@ class GLSLParser {
 						pos: item.pos
 					});
 				case FMethod(k):
-					trace("这是个方法！");
+					// TODO 应该需要支持解析父节点的方法语法
+					// trace("这是个方法！", TypedExprTools.toString(item.expr()));
 			}
 		}
 		parentParser = new GLSLParser(parent.t, parentFieldList);
