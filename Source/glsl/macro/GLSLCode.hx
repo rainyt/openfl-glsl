@@ -281,9 +281,9 @@ class GLSLCode {
 
 	public function getGLSLCode():String {
 		var code = [];
-		for (field in this.useVars) {
-			code.push(field.getGLSLCode());
-		}
+		// for (field in this.useVars) {
+		// 	code.push(field.getGLSLCode());
+		// }
 		return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
 	}
 }

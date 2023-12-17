@@ -184,7 +184,14 @@ class GLSLParser {
 		var code = glslsMap.get("vertex");
 		if (code == null)
 			return null;
-		return code.getGLSLCode();
+		var codes = [];
+		for (field in uniforms) {
+			codes.push(field.getGLSLCode());
+		}
+		codes.push(code.getGLSLCode());
+		var vertex = codes.join("\n");
+		vertex = StringTools.replace(vertex, "super.vertex();", "#pragma body");
+		return vertex;
 	}
 
 	/**
@@ -195,7 +202,14 @@ class GLSLParser {
 		var code = glslsMap.get("fragment");
 		if (code == null)
 			return null;
-		return code.getGLSLCode();
+		var codes = [];
+		for (field in uniforms) {
+			codes.push(field.getGLSLCode());
+		}
+		codes.push(code.getGLSLCode());
+		var fragment = codes.join("\n");
+		fragment = StringTools.replace(fragment, "super.fragment();", "#pragma body");
+		return fragment;
 	}
 }
 #end
