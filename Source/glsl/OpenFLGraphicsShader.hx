@@ -6,7 +6,7 @@ import zygame.core.Start;
 #if openfl
 import openfl.display.GraphicsShader;
 
-@:autoBuild(glsl.macro.GLSLCompileMacro.build())
+@:autoBuild(glsl.macro.GLSLCompileMacro.build("openfl"))
 class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.core.Refresher #end {
 	/** 
 	 * 纹理UV

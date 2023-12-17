@@ -6,7 +6,7 @@ import zygame.core.Start;
 #if openfl
 import openfl.display.DisplayObjectShader;
 
-@:autoBuild(glsl.macro.GLSLCompileMacro.build())
+@:autoBuild(glsl.macro.GLSLCompileMacro.build("openfl"))
 class OpenFLShader extends DisplayObjectShader #if zygame implements zygame.core.Refresher #end {
 
 	/**

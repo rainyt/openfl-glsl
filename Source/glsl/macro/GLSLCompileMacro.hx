@@ -17,15 +17,61 @@ class GLSLCompileMacro {
 	 * @param mode 
 	 * @return Array<Field>
 	 */
-	public static function build(mode:String):Array<Field> {
-		
-
+	public static function build(mode:String = "openfl"):Array<Field> {
 		var list = Context.getBuildFields();
+		var classMetas = Context.getLocalClass().get().meta.get().map(f -> {
+			return f.name;
+		});
+		var isDebug = classMetas.contains(":debug");
 		var glslFields = new GLSLParser(Context.getLocalClass(), list);
 		var vertex = glslFields.getVertexGLSLCode();
 		var fragment = glslFields.getFragmentGLSLCode();
-		trace("vertex=", vertex);
-		trace("fragment=", fragment);
+		if (isDebug) {
+			trace("Class:", Context.getLocalClass().get().name);
+			trace("vertex=", vertex);
+			trace("fragment=", fragment);
+		}
+		if (mode == "openfl") {
+			// 需要定义OpenFL的着色器参数
+			var openflGLSource = [];
+			if (fragment != null) {
+				openflGLSource.push({
+					name: ":glFragmentSource",
+					params: [macro $v{fragment}],
+					pos: Context.currentPos()
+				});
+			}
+			if (vertex != null) {
+				openflGLSource.push({
+					name: ":glVertexSource",
+					params: [macro $v{vertex}],
+					pos: Context.currentPos()
+				});
+			}
+			var newField = null;
+			for (f in list) {
+				if (f.name == "new") {
+					newField = f;
+					newField.meta = openflGLSource;
+					break;
+				}
+			}
+			if (newField == null) {
+				newField = {
+					name: "new",
+					doc: null,
+					meta: openflGLSource,
+					access: [APublic],
+					kind: FFun({
+						args: [],
+						ret: macro :Void,
+						expr: macro {super();}
+					}),
+					pos: Context.currentPos()
+				};
+				list.push(newField);
+			}
+		}
 		return list;
 	}
 }

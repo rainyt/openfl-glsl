@@ -47,8 +47,8 @@ class GLSLField {
 			case FVar(t, e):
 				// TODO e参数可以作为默认值实现，待支持
 				var typeName = ComplexTypeTools.toString(t);
-				if (typeName == "StdTypes.Float") {
-					fieldType = "float";
+				if (typeName.indexOf(".") != -1) {
+					fieldType = typeName.split(".").pop();
 				} else
 					fieldType = typeName;
 			default:

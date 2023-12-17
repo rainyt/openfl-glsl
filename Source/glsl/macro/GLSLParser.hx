@@ -182,6 +182,8 @@ class GLSLParser {
 	 */
 	public function getVertexGLSLCode():String {
 		var code = glslsMap.get("vertex");
+		if (code == null)
+			return null;
 		return code.getGLSLCode();
 	}
 
@@ -191,6 +193,8 @@ class GLSLParser {
 	 */
 	public function getFragmentGLSLCode():String {
 		var code = glslsMap.get("fragment");
+		if (code == null)
+			return null;
 		return code.getGLSLCode();
 	}
 }
