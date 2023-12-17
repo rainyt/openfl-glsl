@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import haxe.macro.ComplexTypeTools;
 import glsl.utils.GLSLFormat;
 import haxe.macro.ExprTools;
 import haxe.macro.Expr;
@@ -17,6 +18,9 @@ class GLSLCode {
 	 */
 	public var defines:Array<GLSLDefine> = [];
 
+	/**
+	 * 方法名
+	 */
 	public var name:String;
 
 	public function new(methodName:String, field:Field) {
@@ -46,7 +50,7 @@ class GLSLCode {
 				switch c {
 					case CInt(v, s):
 						switch (custom) {
-							case "vec2", "vec3", "vec4":
+							case "vec2", "vec3", "vec4", "float":
 								return v + ".";
 						}
 					default:
@@ -125,7 +129,15 @@ class GLSLCode {
 			case ENew(t, params):
 			case EUnop(op, postFix, e):
 			case EVars(vars):
-				trace(vars);
+				var codes = [];
+				for (item in vars) {
+					var type = item.type != null ? getComplexType(item.type) : getExprType(item.expr);
+					if (item.expr != null)
+						codes.push('${type} ${item.name} = ${parserCodeExpr(item.expr)}');
+					else
+						codes.push('${type} ${item.name}');
+				}
+				return codes.join("\n");
 			case EFunction(kind, f):
 			case EBlock(exprs):
 				var codes = [];
@@ -182,6 +194,61 @@ class GLSLCode {
 		}
 		return #if false'(${expr.expr.getName()})' + #end
 		ExprTools.toString(expr);
+	}
+
+	public function getComplexType(type:ComplexType):String {
+		var t = ComplexTypeTools.toString(type);
+		return t.toLowerCase();
+	}
+
+	public function getExprType(expr:Expr):String {
+		switch expr.expr {
+			case EConst(c):
+				switch c {
+					case CInt(v, s):
+						return "int";
+					case CFloat(f, s):
+						return "float";
+					default:
+						throw "Don't support " + c.getName() + "type";
+				}
+			case ECall(e, params):
+				var funName = ExprTools.toString(e);
+				switch (funName) {
+					case "vec2", "vec2", "vec3", "vec4":
+						return funName;
+				}
+			// case EArray(e1, e2):
+			// case EBinop(op, e1, e2):
+			// case EField(e, field, kind):
+			// case EParenthesis(e):
+			// case EObjectDecl(fields):
+			// case EArrayDecl(values):
+			// case ENew(t, params):
+			// case EUnop(op, postFix, e):
+			// case EVars(vars):
+			// case EFunction(kind, f):
+			// case EBlock(exprs):
+			// case EFor(it, expr):
+			// case EIf(econd, eif, eelse):
+			// case EWhile(econd, e, normalWhile):
+			// case ESwitch(e, cases, edef):
+			// case ETry(e, catches):
+			// case EReturn(e):
+			// case EBreak:
+			// case EContinue:
+			// case EUntyped(e):
+			// case EThrow(e):
+			// case ECast(e, t):
+			// case EDisplay(e, displayKind):
+			// case ETernary(econd, eif, eelse):
+			// case ECheckType(e, t):
+			// case EMeta(s, e):
+			// case EIs(e, t):
+			default:
+				throw "Don't support " + expr.expr.getName() + " type";
+		}
+		return "???";
 	}
 }
 #end
