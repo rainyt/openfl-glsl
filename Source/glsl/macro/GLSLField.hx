@@ -1,6 +1,6 @@
 package glsl.macro;
 
-import haxe.macro.Context;
+import haxe.macro.ComplexTypeTools;
 import haxe.macro.Expr.Field;
 
 #if macro
@@ -11,9 +11,14 @@ class GLSLField {
 	private var __field:Field;
 
 	/**
-	 * 新增的变量定义
+	 * GLSL变量定义名
 	 */
-	public var exprField:Field;
+	private var fieldName:String;
+
+	/**
+	 * GLSL变量定义类型
+	 */
+	private var fieldType:String;
 
 	/**
 	 * GLSL变量定义类型
@@ -23,7 +28,7 @@ class GLSLField {
 	public function new(type:GLSLFieldType, field:Field) {
 		__field = field;
 		this.glslFieldType = type;
-		var fieldName = field.name;
+		fieldName = field.name;
 		switch glslFieldType {
 			case UNIFORM:
 				fieldName = "u_" + fieldName;
@@ -32,12 +37,18 @@ class GLSLField {
 				fieldName = "a_" + fieldName;
 			case NONE:
 		}
-		exprField = {
-			name: fieldName,
-			access: [APublic],
-			kind: field.kind,
-			pos: Context.currentPos()
-		};
+		switch field.kind {
+			case FVar(t, e):
+				// TODO e参数可以作为默认值实现，待支持
+				var typeName = ComplexTypeTools.toString(t);
+				fieldType = typeName;
+			default:
+				throw "Don't support FFun FProp";
+		}
+	}
+
+	public function getGLSLCode():String {
+		return fieldType.toLowerCase() + " " + fieldName + ";";
 	}
 }
 #end

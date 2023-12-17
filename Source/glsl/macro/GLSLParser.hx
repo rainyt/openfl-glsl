@@ -29,6 +29,11 @@ class GLSLParser {
 	 */
 	public var glsls:Array<GLSLCode> = [];
 
+	/**
+	 * GLSL代码Map映射
+	 */
+	public var glslsMap:Map<String, GLSLCode> = [];
+
 	public function new(list:Array<Field>) {
 		for (item in list) {
 			switch item.kind {
@@ -42,6 +47,13 @@ class GLSLParser {
 				case FProp(get, set, t, e):
 					// 不支持
 			}
+		}
+		// 开始将属性追加到定义中
+		for (code in glsls) {
+			for (define in code.defines) {
+				list.push(define.getField());
+			}
+			glslsMap.set(code.name, code);
 		}
 	}
 
@@ -95,14 +107,14 @@ class GLSLParser {
 	 * 
 	 */
 	public function getVertexGLSLCode():String {
-		return "";
+		return glslsMap.get("vertex").glslCode;
 	}
 
 	/**
 	 * @return String
 	 */
 	public function getFragmentGLSLCode():String {
-		return "";
+		return glslsMap.get("fragment").glslCode;
 	}
 }
 #end

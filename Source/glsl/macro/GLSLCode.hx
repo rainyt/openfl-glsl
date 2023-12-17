@@ -7,14 +7,33 @@ import haxe.macro.Expr.Field;
 
 #if macro
 class GLSLCode {
-	public var codes:Array<String> = [];
+	/**
+	 * 已编译的GLSL代码
+	 */
+	public var glslCode:String;
+
+	/**
+	 * GLSL中定义的参数
+	 */
+	public var defines:Array<GLSLDefine> = [];
+
+	public var name:String;
 
 	public function new(methodName:String, field:Field) {
+		this.name = methodName;
 		switch field.kind {
 			case FFun(f):
-				var code = parserCodeExpr(f.expr);
-				code = GLSLFormat.format(code);
-				trace("code:", "\n" + code);
+				for (item in field.meta.iterator()) {
+					switch (item.name) {
+						case ":define", ":d":
+							// 定义
+							var d = new GLSLDefine();
+							d.parserDefine(ExprTools.getValue(item.params[0]));
+							defines.push(d);
+					}
+				}
+				glslCode = parserCodeExpr(f.expr);
+				glslCode = GLSLFormat.format(glslCode);
 			default:
 		}
 	}
@@ -111,7 +130,20 @@ class GLSLCode {
 			case EBlock(exprs):
 				var codes = [];
 				for (item in exprs) {
-					codes.push(parserCodeExpr(item) + ";");
+					switch item.expr {
+						case EBlock(exprs):
+							codes.push(parserCodeExpr(item));
+						case EFor(it, expr):
+							codes.push(parserCodeExpr(item));
+						case EIf(econd, eif, eelse):
+							codes.push(parserCodeExpr(item));
+						case EWhile(econd, e, normalWhile):
+							codes.push(parserCodeExpr(item));
+						case ESwitch(e, cases, edef):
+							codes.push(parserCodeExpr(item));
+						default:
+							codes.push(parserCodeExpr(item) + ";");
+					}
 				}
 				return '{
 					${codes.join("\n")}
@@ -148,7 +180,7 @@ class GLSLCode {
 			case EMeta(s, e):
 			case EIs(e, t):
 		}
-		return #if true'(${expr.expr.getName()})' + #end
+		return #if false'(${expr.expr.getName()})' + #end
 		ExprTools.toString(expr);
 	}
 }
