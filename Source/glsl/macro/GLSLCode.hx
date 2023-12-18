@@ -87,7 +87,7 @@ class GLSLCode implements IGLSL {
 									if (call != null) {
 										switch call.rootField.kind {
 											case FFun(f):
-												trace("参数：", f.args);
+											// trace("参数：", f.args);
 											default:
 										}
 									}
@@ -256,6 +256,8 @@ class GLSLCode implements IGLSL {
 	}
 
 	public function getComplexType(type:ComplexType):String {
+		if (type == null)
+			return "void";
 		var t = ComplexTypeTools.toString(type);
 		return t.toLowerCase();
 	}
@@ -317,7 +319,19 @@ class GLSLCode implements IGLSL {
 				if (this.name == "vexter" || this.name == "fragment")
 					return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
 				else {
-					return code.concat(["\nvoid " + this.name + "(void)" + glslCode]).join("\n");
+					var params = [];
+					var ret:Null<ComplexType> = null;
+					switch this.rootField.kind {
+						case FFun(f):
+							ret = f.ret;
+							for (item in f.args) {
+								params.push('${getComplexType(item.type)} ${item.name}');
+							}
+						default:
+					}
+					return code.concat([
+						"\n" + getComplexType(ret) + " " + this.name + "(" + params.join(", ") + ")" + glslCode
+					]).join("\n");
 				}
 			default:
 				return code.concat(["\nvoid " + this.name + "(void)" + glslCode]).join("\n");

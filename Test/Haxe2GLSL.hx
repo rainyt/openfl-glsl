@@ -21,7 +21,7 @@ class Haxe2GLSL extends BaseGLSL {
 	}
 
 	@:glsl
-	public function getAlpha(void) {
+	public function getAlpha() {
 		return texture2D(gl_openfl_Texture, vec2(1, 1)).a;
 	}
 
