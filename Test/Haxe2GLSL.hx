@@ -13,6 +13,11 @@ function float(a:Dynamic):Dynamic {
 class Haxe2GLSL extends BaseGLSL {
 	@:attribute public var a:Vec2;
 
+	@:fragment
+	public function circleCheck(i:Float):Float {
+		return i;
+	}
+
 	@:define("TEXT 1")
 	override public function fragment():Void {
 		super.fragment();
@@ -25,7 +30,7 @@ class Haxe2GLSL extends BaseGLSL {
 		} else {
 			gl_FragColor = vec4(1, 1, 1, 1);
 		}
-		var w:Float = 0;
+		var w:Float = circleCheck(0);
 		while (w < 100) {
 			for (i in 0...10) {
 				w++;
