@@ -50,7 +50,7 @@ class GLSLCode implements IGLSL {
 							defines.push(d);
 					}
 				}
-				glslCode = parserCodeExpr(f.expr);
+				glslCode = parserCodeExpr(f.expr, null);
 				glslCode = GLSLFormat.format(glslCode);
 			default:
 		}
@@ -71,9 +71,12 @@ class GLSLCode implements IGLSL {
 		return field;
 	}
 
-	public function parserCodeExpr(expr:Expr, ?custom:Dynamic):String {
+	public function parserCodeExpr(expr:Expr, exprTree:GLSLExprTree, ?custom:String):String {
 		if (expr == null)
 			return null;
+		if (exprTree == null)
+			exprTree = new GLSLExprTree(expr);
+		exprTree = exprTree.addChild(expr);
 		switch expr.expr {
 			case EConst(c):
 				switch c {
@@ -106,61 +109,61 @@ class GLSLCode implements IGLSL {
 			case EBinop(op, e1, e2):
 				switch op {
 					case OpAdd:
-						return '${parserCodeExpr(e1)}+${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}+${parserCodeExpr(e2, exprTree)}';
 					case OpMult:
-						return '${parserCodeExpr(e1)}*${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}*${parserCodeExpr(e2, exprTree)}';
 					case OpDiv:
-						return '${parserCodeExpr(e1)}/${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}/${parserCodeExpr(e2, exprTree)}';
 					case OpSub:
-						return '${parserCodeExpr(e1)}-${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}-${parserCodeExpr(e2, exprTree)}';
 					case OpAssign:
-						return '${parserCodeExpr(e1)}=${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}=${parserCodeExpr(e2, exprTree)}';
 					case OpEq:
-						return '${parserCodeExpr(e1)}==${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}==${parserCodeExpr(e2, exprTree)}';
 					case OpNotEq:
-						return '${parserCodeExpr(e1)}!=${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}!=${parserCodeExpr(e2, exprTree)}';
 					case OpGt:
-						return '${parserCodeExpr(e1)}>${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}>${parserCodeExpr(e2, exprTree)}';
 					case OpGte:
-						return '${parserCodeExpr(e1)}>=${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}>=${parserCodeExpr(e2, exprTree)}';
 					case OpLt:
-						return '${parserCodeExpr(e1)}<${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}<${parserCodeExpr(e2, exprTree)}';
 					case OpLte:
-						return '${parserCodeExpr(e1)}<=${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}<=${parserCodeExpr(e2, exprTree)}';
 					case OpAnd:
 					case OpOr:
 					case OpXor:
 					case OpBoolAnd:
-						return '${parserCodeExpr(e1)} && ${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)} && ${parserCodeExpr(e2, exprTree)}';
 					case OpBoolOr:
-						return '${parserCodeExpr(e1)} || ${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)} || ${parserCodeExpr(e2, exprTree)}';
 					case OpShl:
 					case OpShr:
 					case OpUShr:
 					case OpMod:
-						return '${parserCodeExpr(e1)}%${parserCodeExpr(e2)}';
+						return '${parserCodeExpr(e1, exprTree)}%${parserCodeExpr(e2, exprTree)}';
 					case OpAssignOp(op):
 						switch op {
 							case OpAdd:
-								return '${parserCodeExpr(e1)}+=${parserCodeExpr(e2)}';
+								return '${parserCodeExpr(e1, exprTree)}+=${parserCodeExpr(e2, exprTree)}';
 							case OpMult:
-								return '${parserCodeExpr(e1)}*=${parserCodeExpr(e2)}';
+								return '${parserCodeExpr(e1, exprTree)}*=${parserCodeExpr(e2, exprTree)}';
 							case OpDiv:
-								return '${parserCodeExpr(e1)}/=${parserCodeExpr(e2)}';
+								return '${parserCodeExpr(e1, exprTree)}/=${parserCodeExpr(e2, exprTree)}';
 							case OpSub:
-								return '${parserCodeExpr(e1)}-=${parserCodeExpr(e2)}';
+								return '${parserCodeExpr(e1, exprTree)}-=${parserCodeExpr(e2, exprTree)}';
 							default:
 						}
 					case OpInterval:
-						return '= ${parserCodeExpr(e1)}; $custom < ${parserCodeExpr(e2)}; $custom++';
+						return '= ${parserCodeExpr(e1, exprTree)}; $custom < ${parserCodeExpr(e2, exprTree)}; $custom++';
 					case OpArrow:
 					case OpIn:
-						var varid = parserCodeExpr(e1);
-						return 'int ${varid} ${parserCodeExpr(e2, varid)}';
+						var varid = parserCodeExpr(e1, exprTree);
+						return 'int ${varid} ${parserCodeExpr(e2, exprTree, varid)}';
 					case OpNullCoal:
 				}
 			case EField(e, field, kind):
-				var objectKey = parserCodeExpr(e);
+				var objectKey = parserCodeExpr(e, exprTree);
 				if (objectKey == "super") {
 					// TODO 父方法，这里需要将父节点的代码合并进来
 					// return field;
@@ -174,12 +177,12 @@ class GLSLCode implements IGLSL {
 					return '$objectKey.$field';
 				}
 			case EParenthesis(e):
-				return '(${parserCodeExpr(e)})';
+				return '(${parserCodeExpr(e, exprTree)})';
 			case EObjectDecl(fields):
 			case EArrayDecl(values):
 			case ECall(e, params):
-				var funcKey = parserCodeExpr(e);
-				var array = params.map(f -> parserCodeExpr(f, funcKey));
+				var funcKey = parserCodeExpr(e, exprTree);
+				var array = params.map(f -> parserCodeExpr(f, exprTree, funcKey));
 				return '$funcKey(${array.join(", ")})';
 			case ENew(t, params):
 			case EUnop(op, postFix, e):
@@ -188,7 +191,7 @@ class GLSLCode implements IGLSL {
 				for (item in vars) {
 					var type = item.type != null ? getComplexType(item.type) : getExprType(item.expr);
 					if (item.expr != null)
-						codes.push('${type} ${item.name} = ${parserCodeExpr(item.expr)}');
+						codes.push('${type} ${item.name} = ${parserCodeExpr(item.expr, exprTree)}');
 					else
 						codes.push('${type} ${item.name}');
 				}
@@ -199,40 +202,40 @@ class GLSLCode implements IGLSL {
 				for (item in exprs) {
 					switch item.expr {
 						case EBlock(exprs):
-							codes.push(parserCodeExpr(item));
+							codes.push(parserCodeExpr(item, exprTree));
 						case EFor(it, expr):
-							codes.push(parserCodeExpr(item));
+							codes.push(parserCodeExpr(item, exprTree));
 						case EIf(econd, eif, eelse):
-							codes.push(parserCodeExpr(item));
+							codes.push(parserCodeExpr(item, exprTree));
 						case EWhile(econd, e, normalWhile):
-							codes.push(parserCodeExpr(item));
+							codes.push(parserCodeExpr(item, exprTree));
 						case ESwitch(e, cases, edef):
-							codes.push(parserCodeExpr(item));
+							codes.push(parserCodeExpr(item, exprTree));
 						default:
-							codes.push(parserCodeExpr(item) + ";");
+							codes.push(parserCodeExpr(item, exprTree) + ";");
 					}
 				}
 				return '{
 					${codes.join("\n")}
 				}';
 			case EFor(it, expr):
-				return 'for(${parserCodeExpr(it)}) ${parserCodeExpr(expr)}${semicolon(expr)}';
+				return 'for(${parserCodeExpr(it, exprTree)}) ${parserCodeExpr(expr, exprTree)}${semicolon(expr)}';
 			case EIf(econd, eif, null):
-				return 'if(${parserCodeExpr(econd)}) ${parserCodeExpr(eif)}${semicolon(eif)}';
+				return 'if(${parserCodeExpr(econd, exprTree)}) ${parserCodeExpr(eif, exprTree)}${semicolon(eif)}';
 			case EIf(econd, eif, eelse):
-				return 'if(${parserCodeExpr(econd)})
-					${parserCodeExpr(eif)}${semicolon(eif)}
-				else ${parserCodeExpr(eelse)}${semicolon(eelse)}';
+				return 'if(${parserCodeExpr(econd, exprTree)})
+					${parserCodeExpr(eif, exprTree)}${semicolon(eif)}
+				else ${parserCodeExpr(eelse, exprTree)}${semicolon(eelse)}';
 			case EWhile(econd, e1, true):
-				return 'while (${parserCodeExpr(econd)})${parserCodeExpr(e1)}${semicolon(e1)}';
+				return 'while (${parserCodeExpr(econd, exprTree)})${parserCodeExpr(e1, exprTree)}${semicolon(e1)}';
 			case EWhile(econd, e1, false):
 				return 'do 
-					${parserCodeExpr(e1)}${semicolon(e1)}
-				  while (${parserCodeExpr(econd)})';
+					${parserCodeExpr(e1, exprTree)}${semicolon(e1)}
+				  while (${parserCodeExpr(econd, exprTree)})';
 			case ESwitch(e, cases, edef):
 			case ETry(e, catches):
 			case EReturn(e):
-				return 'return ${parserCodeExpr(e)}';
+				return 'return ${parserCodeExpr(e, exprTree)}';
 			case EBreak:
 			case EContinue:
 			case EUntyped(e):
@@ -262,7 +265,7 @@ class GLSLCode implements IGLSL {
 		return t.toLowerCase();
 	}
 
-	public function getExprType(expr:Expr):String {
+	public function getExprType(expr:Expr, ?exprTree:GLSLExprTree):String {
 		switch expr.expr {
 			case EConst(c):
 				switch c {
@@ -274,7 +277,7 @@ class GLSLCode implements IGLSL {
 						throw "Don't support " + c.getName() + "type";
 				}
 			case ECall(e, params):
-				var funName = parserCodeExpr(e);
+				var funName = parserCodeExpr(e, null);
 				switch (funName) {
 					case "vec2", "vec3", "vec4":
 						return funName;
