@@ -108,7 +108,6 @@ class GLSLParser {
 			for (define in code.defines) {
 				list.push(define.getField());
 			}
-			glslsMap.set(code.name, code);
 		}
 	}
 
@@ -170,8 +169,11 @@ class GLSLParser {
 			case FVar(t, e):
 			case FFun(f):
 				var metas = field.meta.map(f -> f.name);
-				if (field.name == "vertex" || field.name == "fragment") {
-					glsls.push(new GLSLCode(field.name, field, this));
+				if (field.name == "vertex" || field.name == "fragment" || metas.contains(":glsl") || metas.contains(":vertexglsl")
+					|| metas.contains(":fragmentglsl")) {
+					var glsl = new GLSLCode(field.name, field, this);
+					glsls.push(glsl);
+					glslsMap.set(glsl.name, glsl);
 				}
 			case FProp(get, set, t, e):
 		}

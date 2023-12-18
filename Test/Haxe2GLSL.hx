@@ -13,7 +13,7 @@ function float(a:Dynamic):Dynamic {
 class Haxe2GLSL extends BaseGLSL {
 	@:attribute public var a:Vec2;
 
-	@:fragment
+	@:glsl
 	public function circleCheck(i:Float):Float {
 		return i;
 	}

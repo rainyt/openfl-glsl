@@ -28,11 +28,17 @@ class GLSLCode {
 	 */
 	public var name:String;
 
+	/**
+	 * 原始定义
+	 */
+	public var rootField:Field;
+
 	private var __parser:GLSLParser;
 
 	public function new(methodName:String, field:Field, parser:GLSLParser) {
 		this.name = methodName;
 		this.__parser = parser;
+		this.rootField = field;
 		switch field.kind {
 			case FFun(f):
 				for (item in field.meta.iterator()) {
@@ -75,6 +81,20 @@ class GLSLCode {
 						switch (custom) {
 							case "vec2", "vec3", "vec4", "float":
 								return v + ".";
+							default:
+								if (custom != null) {
+									trace(__parser);
+									trace(__parser.glslsMap);
+									trace(custom);
+									var call = __parser.glslsMap.get(custom);
+									if (call != null) {
+										switch call.rootField.kind {
+											case FFun(f):
+												trace("参数：", f.args);
+											default:
+										}
+									}
+								}
 						}
 					case CIdent(s):
 						var field = __getGLSLField(s);
