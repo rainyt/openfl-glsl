@@ -94,6 +94,10 @@ class GLSLCode implements IGLSL {
 											default:
 										}
 									}
+								} else if (exprTree != null) {
+									// 查找父节点是否为浮点，如果是浮点，则为Int添加浮点支持
+									if (exprTree.isFloatTree())
+										return v + ".";
 								}
 						}
 					case CIdent(s):
