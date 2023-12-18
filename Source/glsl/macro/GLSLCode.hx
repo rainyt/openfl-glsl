@@ -7,7 +7,7 @@ import haxe.macro.Expr;
 import haxe.macro.Expr.Field;
 
 #if macro
-class GLSLCode {
+class GLSLCode implements IGLSL {
 	/**
 	 * 已编译的GLSL代码
 	 */
@@ -21,7 +21,7 @@ class GLSLCode {
 	/**
 	 * 已使用的变量定义
 	 */
-	public var useVars:Map<String, GLSLField> = [];
+	public var useVars:Map<String, IGLSL> = [];
 
 	/**
 	 * 方法名
@@ -83,9 +83,6 @@ class GLSLCode {
 								return v + ".";
 							default:
 								if (custom != null) {
-									trace(__parser);
-									trace(__parser.glslsMap);
-									trace(custom);
 									var call = __parser.glslsMap.get(custom);
 									if (call != null) {
 										switch call.rootField.kind {
@@ -235,6 +232,7 @@ class GLSLCode {
 			case ESwitch(e, cases, edef):
 			case ETry(e, catches):
 			case EReturn(e):
+				return 'return ${parserCodeExpr(e)}';
 			case EBreak:
 			case EContinue:
 			case EUntyped(e):
@@ -313,8 +311,17 @@ class GLSLCode {
 	}
 
 	public function getGLSLCode():String {
-		var code = ["#pragma header"];
-		return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
+		var code = [];
+		switch __parser.platfrom {
+			case "openfl":
+				if (this.name == "vexter" || this.name == "fragment")
+					return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
+				else {
+					return code.concat(["\nvoid " + this.name + "(void)" + glslCode]).join("\n");
+				}
+			default:
+				return code.concat(["\nvoid " + this.name + "(void)" + glslCode]).join("\n");
+		}
 	}
 }
 #end

@@ -9,6 +9,11 @@ import haxe.macro.Expr.Field;
 #if macro
 class GLSLParser {
 	/**
+	 * 编译平台
+	 */
+	public var platfrom:String = "openfl";
+
+	/**
 	 * 所有定义
 	 */
 	public var fields:Array<GLSLField> = [];
@@ -186,9 +191,13 @@ class GLSLParser {
 		var code = glslsMap.get("vertex");
 		if (code == null)
 			return null;
-		var codes = [];
+		var codes = platfrom == "openfl" ? ["#pragma header"] : [];
 		for (field in uniforms) {
 			codes.push(field.getGLSLCode());
+		}
+		for (glsl in glsls) {
+			if (glsl.name != "vertex" && glsl.name != "fragment")
+				codes.push(glsl.getGLSLCode());
 		}
 		codes.push(code.getGLSLCode());
 		var vertex = codes.join("\n");
@@ -204,9 +213,13 @@ class GLSLParser {
 		var code = glslsMap.get("fragment");
 		if (code == null)
 			return null;
-		var codes = [];
+		var codes = platfrom == "openfl" ? ["#pragma header"] : [];
 		for (field in uniforms) {
 			codes.push(field.getGLSLCode());
+		}
+		for (glsl in glsls) {
+			if (glsl.name != "vertex" && glsl.name != "fragment")
+				codes.push(glsl.getGLSLCode());
 		}
 		codes.push(code.getGLSLCode());
 		var fragment = codes.join("\n");

@@ -1,5 +1,7 @@
 package;
 
+import glsl.Sampler2D;
+import glsl.GLSL.texture2D;
 import VectorMath;
 
 function float(a:Dynamic):Dynamic {
@@ -16,6 +18,11 @@ class Haxe2GLSL extends BaseGLSL {
 	@:glsl
 	public function circleCheck(i:Float):Float {
 		return i;
+	}
+
+	@:glsl
+	public function getAlpha(void) {
+		return texture2D(gl_openfl_Texture, vec2(1, 1)).a;
 	}
 
 	@:define("TEXT 1")
@@ -64,6 +71,8 @@ class BaseGLSL {
 	@:glsl public var abc:Float;
 
 	@:glsl public var b:Bool;
+
+	@:glsl public var gl_openfl_Texture:Sampler2D;
 
 	/**
 	 * 最终值输出

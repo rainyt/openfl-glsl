@@ -4,7 +4,7 @@ import haxe.macro.ComplexTypeTools;
 import haxe.macro.Expr.Field;
 
 #if macro
-class GLSLField {
+class GLSLField implements IGLSL {
 	/**
 	 * 代入值
 	 */
