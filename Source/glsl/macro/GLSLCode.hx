@@ -199,13 +199,9 @@ class GLSLCode {
 					${codes.join("\n")}
 				}';
 			case EFor(it, expr):
-				return 'for(${parserCodeExpr(it)}) {
-					${parserCodeExpr(expr)}
-				}';
+				return 'for(${parserCodeExpr(it)}) ${parserCodeExpr(expr)}';
 			case EIf(econd, eif, null):
-				return 'if(${parserCodeExpr(econd)}){
-					${parserCodeExpr(eif)}
-				}';
+				return 'if(${parserCodeExpr(econd)}) ${parserCodeExpr(eif)}';
 			case EIf(econd, eif, eelse):
 				return 'if(${parserCodeExpr(econd)})
 					${parserCodeExpr(eif)}
