@@ -254,7 +254,7 @@ class GLSLCode {
 						throw "Don't support " + c.getName() + "type";
 				}
 			case ECall(e, params):
-				var funName = ExprTools.toString(e);
+				var funName = parserCodeExpr(e);
 				switch (funName) {
 					case "vec2", "vec3", "vec4":
 						return funName;
