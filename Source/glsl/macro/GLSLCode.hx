@@ -157,6 +157,7 @@ class GLSLCode {
 					return '$objectKey.$field';
 				}
 			case EParenthesis(e):
+				return '(${parserCodeExpr(e)})';
 			case EObjectDecl(fields):
 			case EArrayDecl(values):
 			case ECall(e, params):
@@ -289,10 +290,7 @@ class GLSLCode {
 	}
 
 	public function getGLSLCode():String {
-		var code = [];
-		// for (field in this.useVars) {
-		// 	code.push(field.getGLSLCode());
-		// }
+		var code = ["#pragma header"];
 		return code.concat(["\nvoid main(void)" + glslCode]).join("\n");
 	}
 }

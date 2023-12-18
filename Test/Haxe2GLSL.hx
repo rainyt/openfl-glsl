@@ -38,7 +38,7 @@ class Haxe2GLSL extends BaseGLSL {
 		var w2 = 1;
 		// Float
 		var w3 = 1.;
-		w3 += abc + this.a.x + time;
+		w3 += abc + this.a.x + (time);
 	}
 
 	public function vertex():Void {

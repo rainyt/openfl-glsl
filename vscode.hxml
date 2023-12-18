@@ -5,3 +5,4 @@
 --main GLSLMain
 --js bin/main.js
 --no-output
+-D no-macro-cache
