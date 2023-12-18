@@ -199,18 +199,18 @@ class GLSLCode {
 					${codes.join("\n")}
 				}';
 			case EFor(it, expr):
-				return 'for(${parserCodeExpr(it)}) ${parserCodeExpr(expr)}';
+				return 'for(${parserCodeExpr(it)}) ${parserCodeExpr(expr)}${semicolon(expr)}';
 			case EIf(econd, eif, null):
-				return 'if(${parserCodeExpr(econd)}) ${parserCodeExpr(eif)}';
+				return 'if(${parserCodeExpr(econd)}) ${parserCodeExpr(eif)}${semicolon(eif)}';
 			case EIf(econd, eif, eelse):
 				return 'if(${parserCodeExpr(econd)})
-					${parserCodeExpr(eif)}
-				else ${parserCodeExpr(eelse)}';
+					${parserCodeExpr(eif)}${semicolon(eif)}
+				else ${parserCodeExpr(eelse)}${semicolon(eelse)}';
 			case EWhile(econd, e1, true):
-				return 'while (${parserCodeExpr(econd)})${parserCodeExpr(e1)}';
+				return 'while (${parserCodeExpr(econd)})${parserCodeExpr(e1)}${semicolon(e1)}';
 			case EWhile(econd, e1, false):
 				return 'do 
-					${parserCodeExpr(e1)}
+					${parserCodeExpr(e1)}${semicolon(e1)}
 				  while (${parserCodeExpr(econd)})';
 			case ESwitch(e, cases, edef):
 			case ETry(e, catches):
@@ -228,6 +228,13 @@ class GLSLCode {
 		}
 		return #if false'(${expr.expr.getName()})' + #end
 		ExprTools.toString(expr);
+	}
+
+	private function semicolon(expr:Expr):String {
+		if (expr.expr.getName() == "EBlock") {
+			return "";
+		}
+		return ";";
 	}
 
 	public function getComplexType(type:ComplexType):String {

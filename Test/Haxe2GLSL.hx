@@ -32,6 +32,8 @@ class Haxe2GLSL extends BaseGLSL {
 				w++;
 				w++;
 			}
+			if (w == 5)
+				break;
 		}
 		var v3 = vec4(1, 1, 1, 1);
 		// Int
