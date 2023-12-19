@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import glsl.utils.GLSLExprTools;
 import haxe.macro.TypedExprTools;
 import haxe.macro.TypeTools;
 import haxe.macro.Type.Ref;
@@ -86,6 +87,8 @@ class GLSLParser {
 	}
 
 	public function new(c:Null<Ref<haxe.macro.ClassType>>, list:Array<Field>) {
+		// 绑定当前节点
+		GLSLExprTools.currentGLSLParser = this;
 		// 解析父节点
 		this.parserParentClass(c);
 		for (item in list) {

@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import glsl.utils.GLSLExprTools;
 import haxe.macro.ComplexTypeTools;
 import glsl.utils.GLSLFormat;
 import haxe.macro.ExprTools;
@@ -193,7 +194,7 @@ class GLSLCode implements IGLSL {
 			case EVars(vars):
 				var codes = [];
 				for (item in vars) {
-					var type = item.type != null ? getComplexType(item.type) : getExprType(item.expr);
+					var type = item.type != null ? getComplexType(item.type) : GLSLExprTools.getExprType(item.expr);
 					if (item.expr != null)
 						codes.push('${type} ${item.name} = ${parserCodeExpr(item.expr, exprTree)}');
 					else
@@ -267,56 +268,6 @@ class GLSLCode implements IGLSL {
 			return "void";
 		var t = ComplexTypeTools.toString(type);
 		return t.toLowerCase();
-	}
-
-	public function getExprType(expr:Expr, ?exprTree:GLSLExprTree):String {
-		switch expr.expr {
-			case EConst(c):
-				switch c {
-					case CInt(v, s):
-						return "int";
-					case CFloat(f, s):
-						return "float";
-					default:
-						throw "Don't support " + c.getName() + "type";
-				}
-			case ECall(e, params):
-				var funName = parserCodeExpr(e, null);
-				switch (funName) {
-					case "vec2", "vec3", "vec4":
-						return funName;
-				}
-			// case EArray(e1, e2):
-			// case EBinop(op, e1, e2):
-			// case EField(e, field, kind):
-			// case EParenthesis(e):
-			// case EObjectDecl(fields):
-			// case EArrayDecl(values):
-			// case ENew(t, params):
-			// case EUnop(op, postFix, e):
-			// case EVars(vars):
-			// case EFunction(kind, f):
-			// case EBlock(exprs):
-			// case EFor(it, expr):
-			// case EIf(econd, eif, eelse):
-			// case EWhile(econd, e, normalWhile):
-			// case ESwitch(e, cases, edef):
-			// case ETry(e, catches):
-			// case EReturn(e):
-			// case EBreak:
-			// case EContinue:
-			// case EUntyped(e):
-			// case EThrow(e):
-			// case ECast(e, t):
-			// case EDisplay(e, displayKind):
-			// case ETernary(econd, eif, eelse):
-			// case ECheckType(e, t):
-			// case EMeta(s, e):
-			// case EIs(e, t):
-			default:
-				throw "Don't support " + expr.expr.getName() + " type";
-		}
-		return "???";
 	}
 
 	public function getGLSLCode():String {

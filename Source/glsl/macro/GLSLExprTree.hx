@@ -1,11 +1,12 @@
 package glsl.macro;
 
+import glsl.utils.GLSLExprTools;
 import haxe.macro.Expr;
 
 class GLSLExprTree {
 	public var expr:Expr;
 
-	public var parentExpr:Expr;
+	public var parentTree:GLSLExprTree;
 
 	public function new(expr:Expr) {
 		this.expr = expr;
@@ -13,7 +14,7 @@ class GLSLExprTree {
 
 	public function addChild(expr:Expr):GLSLExprTree {
 		var child = new GLSLExprTree(expr);
-		child.parentExpr = expr;
+		child.parentTree = this;
 		return child;
 	}
 
@@ -22,13 +23,12 @@ class GLSLExprTree {
 	 * @return Bool
 	 */
 	public function isFloatTree():Bool {
-		if (parentExpr != null) {
-			switch parentExpr.expr {
+		if (parentTree != null) {
+			switch parentTree.expr.expr {
 				case EConst(c):
 					switch c {
 						case CInt(v, s):
 						case CFloat(f, s):
-							return true;
 						case CString(s, kind):
 						case CIdent(s):
 						case CRegexp(r, opt):
@@ -36,32 +36,14 @@ class GLSLExprTree {
 				case EArray(e1, e2):
 				case EBinop(op, e1, e2):
 					switch op {
-						case OpAdd:
-						case OpMult:
 						case OpDiv:
 							return true;
-						case OpSub:
-						case OpAssign:
-						case OpEq:
-						case OpNotEq:
-						case OpGt:
-						case OpGte:
-						case OpLt:
-						case OpLte:
-						case OpAnd:
-						case OpOr:
-						case OpXor:
-						case OpBoolAnd:
-						case OpBoolOr:
-						case OpShl:
-						case OpShr:
-						case OpUShr:
-						case OpMod:
-						case OpAssignOp(op):
-						case OpInterval:
-						case OpArrow:
-						case OpIn:
-						case OpNullCoal:
+						default:
+							var type = GLSLExprTools.getExprType(e1);
+							switch (type) {
+								case "float":
+									return true;
+							}
 					}
 				case EField(e, field, kind):
 				case EParenthesis(e):
@@ -90,6 +72,7 @@ class GLSLExprTree {
 				case EMeta(s, e):
 				case EIs(e, t):
 			}
+			return parentTree.isFloatTree();
 		}
 		return false;
 	}
