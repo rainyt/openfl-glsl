@@ -1,5 +1,6 @@
 package glsl.macro;
 
+import haxe.macro.ExprTools;
 import sys.FileSystem;
 import sys.io.File;
 import haxe.macro.Type.ClassField;
@@ -119,8 +120,14 @@ class GLSLCompileMacro {
 		output = Context.getDefines().get("output");
 		shader = "\n";
 		var pos:Position = Context.currentPos();
-		isDebug = Context.getLocalClass().get().meta.has(":debug");
-		var noShader = Context.getLocalClass().get().meta.has(":noshader");
+		var localMeta = Context.getLocalClass().get().meta;
+		isDebug = localMeta.has(":debug");
+		var noShader = localMeta.has(":noshader");
+		var glslVersion:Dynamic = null;
+		if (localMeta.has(":version")) {
+			var versionMeta = localMeta.get().filter(f -> f.name == ":version");
+			glslVersion = ExprTools.getValue(versionMeta[0].params[0]);
+		}
 		var info = Context.getPosInfos(pos);
 		Context.registerModuleDependency(Context.getLocalModule(), info.file);
 		if (noShader) {
@@ -154,6 +161,12 @@ class GLSLCompileMacro {
 		// var fragment = (fnoheader || platform == "glsl") ? "" : "#pragma header\n";
 		var vertex = (platform == "glsl") ? "" : "#pragma header\n";
 		var fragment = (platform == "glsl") ? "" : "#pragma header\n";
+
+		if (glslVersion != null) {
+			vertex += "#version " + glslVersion + "\n";
+			fragment += "#version " + glslVersion + "\n";
+		}
+
 		for (d in fdefines) {
 			fragment += d;
 		}
