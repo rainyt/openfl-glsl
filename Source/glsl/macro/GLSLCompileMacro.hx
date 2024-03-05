@@ -115,9 +115,6 @@ class GLSLCompileMacro {
 	 * @return Array<Field>
 	 */
 	macro public static function build(platform:String = "openfl"):Array<Field> {
-		var cls = haxe.macro.Context.getLocalClass().get().name;
-		trace(cls, "GLSLCompileMacro");
-
 		GLSLCompileMacro.platform = platform;
 		fields = Context.getBuildFields();
 		output = Context.getDefines().get("output");
