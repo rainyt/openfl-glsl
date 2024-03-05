@@ -6,8 +6,14 @@ import zygame.core.Start;
 #if openfl
 import openfl.display.GraphicsShader;
 
+#if (haxe5 || haxe_next)
+@:autoBuild(glsl.macro.GLSLCompileMacro.build())
+interface IOpenFLGraphicsShader {}
+class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.core.Refresher #end implements IOpenFLGraphicsShader {
+#else
 @:autoBuild(glsl.macro.GLSLCompileMacro.build())
 class OpenFLGraphicsShader extends GraphicsShader #if zygame implements zygame.core.Refresher #end {
+#end
 	/** 
 	 * 纹理UV
 	 */
