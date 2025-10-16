@@ -174,7 +174,7 @@ class GLSLCompileMacro {
 			vertex += d;
 		}
 
-		// attribute定义
+		// attribute定义 'attribute' :  supported in vertex shaders only
 		for (key => value in attribute) {
 			vertex += value;
 		}
@@ -496,7 +496,7 @@ class GLSLCompileMacro {
 					var line:String = "";
 					switch (expr.getName()) {
 						case "EField":
-						// 已定义对象赋值
+							// 已定义对象赋值
 						case "EVars":
 							// 定义局部变量
 							var vars = expr.getParameters()[0];
@@ -575,6 +575,12 @@ class GLSLCompileMacro {
 				expr = expr.getParameters()[0];
 				lastType = expr.getName().substr(1);
 				return lastType.charAt(0).toLowerCase() + lastType.substr(1);
+			case "TInst":
+				lastType = Std.string(expr.getParameters()[0]);
+				if (lastType == "glsl.Sampler2D") {
+					return "sampler2D";
+				}
+				return lastType;
 			default:
 				throw "无法使用" + type + "建立类型关系" + expr;
 		}
