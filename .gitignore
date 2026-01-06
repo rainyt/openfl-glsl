@@ -1,3 +1,4 @@
 
 .dev
 .DS_Store
+.marscode/deviceInfo.json
