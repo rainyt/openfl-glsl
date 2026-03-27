@@ -4,7 +4,7 @@
   "license": "MIT",
   "tags": ["openfl","zygameui"],
   "description": "Allow Haxe to write GLSL directly in OpenFL.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "releasenote": "New @:vertexglsl, glsl method only effective in vertex",
   "contributors": ["rainy"],
   "dependencies": {
